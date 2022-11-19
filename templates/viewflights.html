@@ -1,0 +1,60 @@
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+<body>
+    Search flights: </br>
+    <form action="/flightSearch" method="POST">
+        <input type="text" name="sourceairport" placeholder="Source airport" maxlength="20" /></br>
+        <input type="text" name="destairport" placeholder="Destination airport" maxlength="20" /></br>
+        <input type="date" name="departdate" /> Departure date</br>
+        <input type="date" name="returndate" /> Return date (For round-trips)</br></br>
+        <input type="submit" value=Search />
+        {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </form>
+
+    <!-- Will need round trip date search as well... -->
+
+    <style type="text/css">
+        table, th, td {
+            border: 1px solid black;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+    </style>
+
+    <table>
+        <th>Airline</th>
+        <th>Flight No.</th>
+        <th>Departure Date/Time</th>
+        <th>Arrival Date/Time</th>
+        <th>Base Price</th>
+        <th>Status</th>
+        <th>Departure Airport</th>
+        <th>Arrival Airport</th>
+        <th>Airplane</th>
+
+        {% for line in flights %}
+        <tr>
+            <td>{{line['airline_name']}}</td>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date_time']}}</td>
+            <td>{{line['arrival_date_time']}}</td>
+            <td>${{line['base_price']}}</td>
+            <td>{{line['flight_status']}}</td>
+            <td>{{line['departure_airport_name']}}</td>
+            <td>{{line['arrival_airport_name']}}</td>
+            <td>{{line['airplane_ID']}}</td>
+        </tr>
+        {% endfor %}
+    </table></br>
+
+    <a href="/">Go back</a>
+
+</body>
+
+</html>

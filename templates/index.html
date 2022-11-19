@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        Air Ticket Reservation System
+    </title>
+</head>
+
+
+
+<body>
+    <a href="/viewflights">Search Upcoming Flights</a><br><br>
+    <a href="/staffLogin">Staff Login</a>
+    <a href="/staffRegister">Staff Register</a> </br>
+    <a href="/customerLogin">Customer Login</a>
+    <a href="/customerRegister">Customer Register</a> </br>
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+</body>
+</html>

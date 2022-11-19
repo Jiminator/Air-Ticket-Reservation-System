@@ -1,0 +1,98 @@
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+<body>
+    Welcome, {{airlinestaff['first_name']}} </br></br>
+
+    <!-- Some of these could be displayed on the user's page too... -->
+
+    <a href="/viewflightsStaff">View flights</a>
+    <a href="/addFlight">New flight</a>
+    <a href="/flightStatus">Update flight status</a>
+    <a href="/addPlane">New plane</a>
+    <a href="/addAirport">New airport</a>
+    <a href="/flightRatings">View flight ratings</a>
+    <a href="/viewAgents">View booking agents</a>
+    <a href="/frequentCustomers">View frequent customers</a>
+    <a href="/viewReports">View reports</a>
+    <a href="/compareRevenue">Revenue</a></br>
+
+    <style type="text/css">
+        table, th, td {
+            border: 1px solid black;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+    </style>
+
+    <p>Upcoming flights:</p>
+
+    <table>
+        <th>Airline</th>
+        <th>Flight No.</th>
+        <th>Departure Date</th>
+        <th>Departure Time</th>
+        <th>Arrival Date</th>
+        <th>Arrival Time</th>
+        <th>Status</th>
+        <th>Base Price</th>
+        <th>Departure Airport</th>
+        <th>Arrival Airport</th>
+        <th>Airplane</th>
+        <th>Passenger List</th>
+
+        {% for line in flights %}
+        <tr>
+            <td>{{line['airline_name']}}</td>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date_time']}}</td>
+            <td>{{line['arrival_date_time']}}</td>
+            <td>{{line['flight_status']}}</td>
+            <td>${{line['base_price']}}</td>
+            <td>{{line['departure_airport_name']}}</td>
+            <td>{{line['arrival_airport_name']}}</td>
+            <td>{{line['airplane_ID']}}</td>
+            <td>
+                <a href = {{ url_for('passengerList' ,airline_name=line['airline_name'],
+                flight_number=line['flight_number'],
+                 departure_date_time=line['departure_date_time']) }}> Detail</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table></br>
+
+    <h2>Top destinations:</h2>
+    <h3>Last 3 months:</h3>
+    <table>
+        <th>Destination</th>
+        <th>Tickets sold</th>
+
+        {% for line in topdestsmonth %}
+        <tr>
+            <td>{{line['arrival_airport_name']}}</td>
+            <td>{{line['ticketCount']}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h3>Last year:</h3>
+    <table>
+        <th>Destination</th>
+        <th>Tickets sold</th>
+
+        {% for line in topdestsyear %}
+        <tr>
+            <td>{{line['arrival_airport_name']}}</td>
+            <td>{{line['ticketCount']}}</td>
+        {% endfor %}
+    </table>
+
+
+
+    </br></br><a href="/staffLogout">Logout</a>
+
+</body>
+
+</html>
