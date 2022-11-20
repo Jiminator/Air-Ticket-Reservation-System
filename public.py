@@ -3,22 +3,18 @@ from app import *
 
 # Define route for viewing flights
 @app.route('/viewflights')
-def viewflights():
-    # cursor used to send queries
+def view_flights():
     cursor = conn.cursor()
-    # executes query
     query = "SELECT * FROM flight WHERE departure_date_time > NOW()"
     cursor.execute(query)
-    # stores the results in a variable
     data = cursor.fetchall()
-    # use fetchall() if you are expecting more than 1 data row
     cursor.close()
     return render_template('viewflights.html', flights=data)
 
 
 # Search flights
-@app.route('/flightSearch',methods=['GET','POST'])
-def flightSearch():
+@app.route('/flightSearch', methods=['GET', 'POST'])
+def flight_search():
     sourceairport = request.form['sourceairport']
     destairport = request.form['destairport']
     departdate = request.form['departdate']
@@ -43,7 +39,7 @@ def flightSearch():
     query = 'SELECT * FROM flight WHERE ' + depart_q + arrive_q + ddate_q + 'departure_date_time > NOW()'
     cursor.execute(query, tuple(flightsearch))
     data = cursor.fetchall()
-    #round-trip
+    # checks for round-trips
     if returndate != '' and sourceairport != '' and destairport != '' and departdate != '' and returndate > departdate:
         flightsearch[0] = destairport
         flightsearch[1] = sourceairport

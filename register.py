@@ -3,13 +3,13 @@ from app import *
 
 # Define route to register customer
 @app.route('/customerRegister')
-def customerRegister():
+def customer_register():
     return render_template('customerRegister.html')
 
 
 # Authenticates register for a new customer
 @app.route('/customerRegisterAuth', methods=['GET', 'POST'])
-def customerRegisterAuth():
+def customer_register_auth():
     email = request.form['email']
     name = request.form['name']
     password = request.form['password']
@@ -24,11 +24,10 @@ def customerRegisterAuth():
     date_of_birth = request.form['dateofbirth']
     cursor = conn.cursor()
     query = 'SELECT * FROM customer WHERE email = %s'
-    cursor.execute(query, (email))
+    cursor.execute(query, email)
     data = cursor.fetchone()
-    error = None
-    if(data):
-        #If the previous query returns data, then user exists
+    if data:
+        # If the previous query returns data, then user exists
         error = "Existing customer; try another email address"
         return render_template('customerRegister.html', error=error)
     else:
@@ -43,13 +42,13 @@ def customerRegisterAuth():
 
 # Define route to register staff
 @app.route('/staffRegister')
-def staffRegister():
+def staff_register():
     return render_template('staffRegister.html')
 
 
 # Authenticates register for a new staff
 @app.route('/staffRegisterAuth', methods=['GET', 'POST'])
-def staffRegisterAuth():
+def staff_register_auth():
     username = request.form['username']
     password = request.form['password']
     first_name = request.form['firstname']
@@ -60,10 +59,9 @@ def staffRegisterAuth():
 
     cursor = conn.cursor()
     query = 'SELECT * FROM airlineStaff WHERE username = %s'
-    cursor.execute(query, (username))
+    cursor.execute(query, username)
     data = cursor.fetchone()
-    error = None
-    if(data):
+    if data:
         error = "Existing staff; try another username"
         return render_template('staffRegister.html', error=error)
     else:

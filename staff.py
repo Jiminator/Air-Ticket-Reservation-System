@@ -3,13 +3,11 @@ from app import *
 
 # Home page for staff
 @app.route('/staffHome')
-def staffHome():
+def staff_home():
     username = session['username']
     cursor = conn.cursor()
-
     query = 'SELECT * FROM airlinestaff WHERE username = %s'
-    cursor.execute(query, (username))
-
+    cursor.execute(query, username)
     userdata = cursor.fetchone()
     query = """
             SELECT DISTINCT
@@ -52,9 +50,7 @@ def staffHome():
     WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 
     AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
     '''
-    # default flight view within 30 days
     cursor.execute(query, (userdata['airline_name']))
-    # stores the results in a variable
     flights_data = cursor.fetchall()
     cursor.close()
     return render_template('staffHome.html', airlinestaff=userdata, topdestsmonth=topdestsmonth,
@@ -63,27 +59,22 @@ def staffHome():
 
 # Define route for passenger list
 @app.route('/passengerList/<airline_name>/<flight_number>/<departure_date_time>/')
-def passengerList(airline_name, flight_number, departure_date_time):
-    # cursor used to send queries
+def passenger_list(airline_name, flight_number, departure_date_time):
     cursor = conn.cursor()
-    # executes query
     query = '''
     SELECT name, phone_number, passport_number, passport_expiration
     FROM customer, purchase, ticket 
     WHERE customer.email = purchase.email AND purchase.ticket_ID = ticket.ticket_ID
     AND airline_name = %s AND flight_number = %s AND departure_date_time = %s
     '''
-    # default flight view within 30 days
     cursor.execute(query, (airline_name, flight_number, departure_date_time))
-    # stores the results in a variable
     data = cursor.fetchall()
-    # use fetchall() if you are expecting more than 1 data row
     cursor.close()
-    return render_template('passengerList.html', passenger = data)
+    return render_template('passengerList.html', passenger=data)
 
 
 # Logout for staff
 @app.route('/staffLogout')
-def logoutStaff():
+def logout_staff():
     session.pop('username')
     return redirect('staffLogin')

@@ -3,13 +3,13 @@ from app import *
 
 # Define route for customer login
 @app.route('/customerLogin')
-def customerLogin():
+def customer_login():
     return render_template('customerLogin.html')
 
 
 # Authenticates the customer login
 @app.route('/customerLoginAuth', methods=['GET', 'POST'])
-def customerLoginAuth():
+def customer_login_auth():
     email = request.form['email']
     password = request.form['password']
     cursor = conn.cursor()
@@ -17,26 +17,25 @@ def customerLoginAuth():
     cursor.execute(query, (email, password))
     data = cursor.fetchone()
     cursor.close()
-    error = None
-    if(data):
-        #creates a session for the the customer, session is a built in
+    if data:
+        # creates a session for the customer, session is a built in
         session['email'] = email
         return redirect(url_for('customerHome'))
     else:
-        #returns an error message to the html page
+        # returns an error message to the html page
         error = 'Invalid login or email'
         return render_template('customerLogin.html', error=error)
 
 
 # Define route for staff login
 @app.route('/staffLogin')
-def staffLogin():
+def staff_login():
     return render_template('staffLogin.html')
 
 
 # Authenticates the staff login
 @app.route('/staffLoginAuth', methods=['GET', 'POST'])
-def staffLoginAuth():
+def staff_login_auth():
     username = request.form['username']
     password = request.form['password']
 
@@ -45,8 +44,7 @@ def staffLoginAuth():
     cursor.execute(query, (username, password))
     data = cursor.fetchone()
     cursor.close()
-    error = None
-    if(data):
+    if data:
         session['username'] = username
         print("Login")
         return redirect(url_for('staffHome'))
