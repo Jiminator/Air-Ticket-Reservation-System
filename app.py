@@ -6,10 +6,10 @@ import pymysql.cursors
 app = Flask(__name__)
 
 # Configure MySQL
-conn = pymysql.connect(host='localhost',
-                       port=8889,
+conn = pymysql.connect(host="127.0.0.1",
+                       port=3306,
                        user='root',
-                       password='root',
+                       password='',
                        db='air_ticket_reservation_system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
