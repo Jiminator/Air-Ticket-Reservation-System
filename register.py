@@ -57,19 +57,31 @@ def staff_register_auth():
     date_of_birth = request.form['dateofbirth']
     airline_name = request.form['airline']
 
+
+    # ensures that the Airline the user entered exists
     cursor = conn.cursor()
-    query = 'SELECT * FROM airlineStaff WHERE username = %s'
-    cursor.execute(query, username)
+    query = 'SELECT * FROM airline WHERE airline_name = %s'
+    cursor.execute(query, airline_name)
     data = cursor.fetchone()
-    if data:
-        error = "Existing staff; try another username"
+    if not data:
+        error = "That airline is does not exist in our system."
         return render_template('staffRegister.html', error=error)
+
     else:
-        ins = 'INSERT INTO airlinestaff VALUES(%s, MD5(%s), %s, %s, %s, %s)'
-        cursor.execute(ins, (username, password, first_name, last_name, date_of_birth, airline_name))
-        ins = 'INSERT INTO staffEmail VALUES(%s, %s)'
-        cursor.execute(ins, (username, email))
-        conn.commit()
-        cursor.close()
-        session['username'] = username
-        return redirect(url_for('staffHome'))
+        # ensures that the username the user entered does not already exist
+        query = 'SELECT * FROM airlineStaff WHERE username = %s'
+        cursor.execute(query, username)
+        data = cursor.fetchone()
+        if data:
+            error = "Existing staff; try another username"
+            return render_template('staffRegister.html', error=error)
+        else:
+            ins = 'INSERT INTO airlinestaff VALUES(%s, MD5(%s), %s, %s, %s, %s)'
+            cursor.execute(ins, (username, password, first_name, last_name, date_of_birth, airline_name))
+            ins = 'INSERT INTO staffEmail VALUES(%s, %s)'
+            cursor.execute(ins, (username, email))
+            conn.commit()
+            cursor.close()
+            session['username'] = username
+            # it has to be staff_home
+            return redirect(url_for('staff_home'))

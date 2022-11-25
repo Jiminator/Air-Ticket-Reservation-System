@@ -47,7 +47,8 @@ def staff_login_auth():
     if data:
         session['username'] = username
         print("Login")
-        return redirect(url_for('staffHome'))
+        return redirect(url_for('staff_home'))
     else:
-        error = 'Invalid login or email'
+        error = 'Invalid Username or Password'
         return render_template('staffLogin.html', error=error)
+

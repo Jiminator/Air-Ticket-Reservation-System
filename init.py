@@ -4,7 +4,7 @@ import pymysql.cursors
 from app import app, conn
 import customer
 import login
-import public
+import flight
 import register
 import staff
 
@@ -13,6 +13,7 @@ import staff
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 
 app.secret_key = 'some key that you will never guess'
