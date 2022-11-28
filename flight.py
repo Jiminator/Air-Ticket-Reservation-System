@@ -30,7 +30,7 @@ def flight_search():
     query1 = """
     SELECT * FROM flight WHERE arrival_airport_name LIKE %s
       AND departure_airport_name LIKE %s AND DATE(departure_date_time) LIKE %s 
-      #AND departure_date_time > NOW()
+      AND departure_date_time > NOW()
     """
 
     cursor = conn.cursor()
@@ -43,36 +43,7 @@ def flight_search():
         flightsearch[0] = destairport
         flightsearch[1] = sourceairport
         flightsearch[2] = returndate
-        cursor.execute(query, tuple(flightsearch))
+        cursor.execute(query1, tuple(flightsearch))
         data += cursor.fetchall()
     cursor.close()
     return render_template('viewflights.html', flights=data)
-
-    # if sourceairport == '':
-    #     depart_q = ''
-    # else:
-    #     flightsearch.append(sourceairport)
-    #     depart_q = 'departure_airport_name = %s AND '
-    # if destairport == '':
-    #     arrive_q = ''
-    # else:
-    #     flightsearch.append(destairport)
-    #     arrive_q = 'arrival_airport_name = %s AND '
-    # if departdate == '':
-    #     ddate_q = ''
-    # else:
-    #     flightsearch.append(departdate)
-    #     ddate_q = 'DATE(departure_date_time) = %s AND '
-    # cursor = conn.cursor()
-    # query = 'SELECT * FROM flight WHERE ' + depart_q + arrive_q + ddate_q + 'departure_date_time > NOW()'
-    # cursor.execute(query, tuple(flightsearch))
-    # data = cursor.fetchall()
-    # # checks for round-trips
-    # if returndate != '' and sourceairport != '' and destairport != '' and departdate != '' and returndate > departdate:
-    #     flightsearch[0] = destairport
-    #     flightsearch[1] = sourceairport
-    #     flightsearch[2] = returndate
-    #     cursor.execute(query, tuple(flightsearch))
-    #     data += cursor.fetchall()
-    # cursor.close()
-    # return render_template('viewflights.html', flights=data)
