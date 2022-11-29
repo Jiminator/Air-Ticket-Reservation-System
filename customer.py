@@ -31,3 +31,19 @@ def customerHome():
 def logoutCustomer():
     session.pop('email')
     return redirect('customerLogin')
+
+
+@app.route('/customerPurchase')
+def customerPurchase():
+
+    cursor = conn.cursor()
+    query = """
+    SELECT DISTINCT *   
+    FROM flight natural join ticket
+    WHERE departure_date_time > NOW();
+    #AND flight.flight_status != 'cancelled'
+    """
+    cursor.execute(query)
+    flightdata = cursor.fetchall()
+    cursor.close()
+    return render_template('customerPurchase.html', flights=flightdata)
