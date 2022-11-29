@@ -6,7 +6,7 @@ import pymysql.cursors
 app = Flask(__name__)
 
 # Configure MySQL
-conn = pymysql.connect(host="localhost",
+conn = pymysql.connect(host="127.0.0.1",
                        port=3306,
                        user='root',
                        password='',
