@@ -58,24 +58,44 @@ def customerPurchaseUpdate():
     cursor = conn.cursor()
     query = 'SELECT base_price, ticket_ID FROM flight NATURAL JOIN ticket WHERE flight_number=%s'
     cursor.execute(query, (flightNo))
-    values = cursor.fetchall()[0]
-    cost = values['base_price']
-    ticketID = values['ticket_ID']
+    values = cursor.fetchall()
 
-    
-    query = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
-    cursor.execute(query, (ticketID, email, cost, cardType, cardNumber,name, expDate))
-    conn.commit()
 
-    # TICKET ID NOT WORKING --wont update correctly#
-    # ticketID += 1
-    # query = 'UPDATE ticketvalue SET currTicketID = %s'
-    # cursor.execute(query, (ticketID))
-    # conn.commit()
+    display = """
+        SELECT DISTINCT *   
+        FROM flight NATURAL JOIN ticket
+        WHERE flight.flight_status != 'cancelled'
+        AND departure_date_time > NOW()
+    """
+    cursor.execute(display)
+    flightdata = cursor.fetchall()
 
+    if values:
+        values = values[0]
+        cost = values['base_price']
+        ticketID = values['ticket_ID']
+    else:
+        message = "Error: that ticket does not exist in our system. Please enter a valid ticket"
+        cursor.close()
+        return render_template('customerPurchase.html', error=message, flights=flightdata)
+
+    # this query may need to change because customers should be able to purchase multiple tickets
+    query = 'SELECT * FROM purchase WHERE ticket_ID=%s'
+    cursor.execute(query, ticketID)
+    data = cursor.fetchone()
+
+
+    if data:
+        # If the previous query returns data, then user exists
+        message = "Error: You have already purchased a ticket for this flight"
+    else:
+        query = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
+        cursor.execute(query, (ticketID, email, cost, cardType, cardNumber,name, expDate))
+        conn.commit()
+        message = "Success: this is confirmation of your purchase"
     cursor.close()
+    return render_template('customerPurchase.html', error=message, flights=flightdata)
 
-    return redirect(url_for('customerPurchase'))
 
 
 
