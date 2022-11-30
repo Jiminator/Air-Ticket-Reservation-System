@@ -1,0 +1,2 @@
+1) Ticket_ID
+2) sold_price
