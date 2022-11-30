@@ -49,39 +49,34 @@ def customerPurchase():
 @app.route('/customerPurchaseUpdate', methods=['GET', 'POST'])
 def customerPurchaseUpdate():
     email = session['email']
-    flightNo = request.form['ticket_ID']
-    ticket = int(request.form['ticket_ID'])
+    flightNo = request.form['flightNo']
     cardType = request.form["card type"]
     name = request.form['Name of Card']
-    cardNumber = int(request.form['cc-number'])
+    cardNumber = request.form['cc-number']
     expDate = request.form["expiration start"]
 
     cursor = conn.cursor()
-    query = 'SELECT base_price FROM flight NATURAL JOIN ticket WHERE flight_number=%s'
+    query = 'SELECT base_price, ticket_ID FROM flight NATURAL JOIN ticket WHERE flight_number=%s'
     cursor.execute(query, (flightNo))
-    cost = cursor.fetchall()
-    print("THISSSSS")
-    print("IT IS A ", cost, type(cost))
-    # NOT COMPLETELY WORKING!!!
-    query = 'INSERT INTO purchase VALUES (1111, %s, 0 ,%s, 3728193847283410, %s, %s, NOW());'
-    cursor.execute(query, (email, cardType, name, expDate))
+    values = cursor.fetchall()[0]
+    cost = values['base_price']
+    ticketID = values['ticket_ID']
+
+    
+    query = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
+    cursor.execute(query, (ticketID, email, cost, cardType, cardNumber,name, expDate))
     conn.commit()
+
+    # TICKET ID NOT WORKING --wont update correctly#
+    # ticketID += 1
+    # query = 'UPDATE ticketvalue SET currTicketID = %s'
+    # cursor.execute(query, (ticketID))
+    # conn.commit()
+
     cursor.close()
 
     return redirect(url_for('customerPurchase'))
 
-    # ensures that the Airline the user entered exists
-    cursor = conn.cursor()
-    query = 'SELECT * FROM airline WHERE airline_name = %s'
-    cursor.execute(query, airline_name)
-    data = cursor.fetchone()
-    ins ='INSERT INTO testing VALUES("SEE THIS WORKEDDDD@gmail.com")'
-    cursor.execute(ins)
-    conn.commit()
-    cursor.close()
-    session['username'] = username
-    # it has to be staff_home
-    return redirect(url_for('staff_home'))
 
 
 @app.route('/customerviewflights')
