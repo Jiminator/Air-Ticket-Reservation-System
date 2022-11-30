@@ -31,3 +31,49 @@ def customerHome():
 def logoutCustomer():
     session.pop('email')
     return redirect('customerLogin')
+
+@app.route('/customerPurchase')
+def customerPurchase():
+    cursor = conn.cursor()
+    query = """
+    SELECT DISTINCT *   
+    FROM flight NATURAL JOIN ticket
+    WHERE flight.flight_status != 'cancelled'
+    AND departure_date_time > NOW()
+    """
+    cursor.execute(query)
+    flightdata = cursor.fetchall()
+    cursor.close()
+    return render_template('customerPurchase.html', flights=flightdata)
+
+
+@app.route('/customerviewflights', methods=['GET', 'POST'])
+def customerviewflights():
+    email = session['email']
+    cursor = conn.cursor()
+    query = """
+    SELECT DISTINCT *   
+    FROM purchase natural join ticket natural join flight
+    WHERE email=%s 
+    #AND departure_date_time > NOW();
+    """
+    cursor.execute(query, (email))
+    flightdata = cursor.fetchall()
+    cursor.close()
+    return render_template('customerviewflights.html', flights=flightdata)
+
+
+@app.route('/customerRateflight', methods=['GET', 'POST'])
+def customerRateflights():
+    email = session['email']
+    cursor = conn.cursor()
+    query = """
+    SELECT DISTINCT *   
+    FROM purchase
+    WHERE email=%s;
+    """
+    cursor.execute(query, (email))
+    flightdata = cursor.fetchall()
+    cursor.close()
+    return render_template('customerRateflight.html', flights=flightdata)
+
