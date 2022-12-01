@@ -2,14 +2,14 @@ from app import *
 
 
 # Define route for viewing flights
-@app.route('/viewflights')
+@app.route('/viewFlights')
 def view_flights():
     cursor = conn.cursor()
     query = "SELECT * FROM flight WHERE departure_date_time > NOW()"
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
-    return render_template('viewflights.html', flights=data)
+    return render_template('viewFlights.html', flights=data)
 
 
 # Search flights
@@ -46,4 +46,4 @@ def flight_search():
         cursor.execute(query1, tuple(flightsearch))
         data += cursor.fetchall()
     cursor.close()
-    return render_template('viewflights.html', flights=data)
+    return render_template('viewFlights.html', flights=data)

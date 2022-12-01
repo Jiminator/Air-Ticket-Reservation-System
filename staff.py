@@ -73,6 +73,81 @@ def passenger_list(airline_name, flight_number, departure_date_time):
     return render_template('passengerList.html', passenger=data)
 
 
+@app.route('/sourceSearch', methods=['GET', 'POST'])
+def sourceSearch():
+    airport = request.form['sourceairport']
+    username = session['username']
+    cursor = conn.cursor()
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
+    query = 'SELECT DISTINCT * FROM flight WHERE departure_airport_name = %s AND airline_name = %s'
+    cursor.execute(query, (airport, airline['airline_name']))
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('staffViewFlights.html', flights=data)
+
+
+@app.route('/destSearch', methods=['GET', 'POST'])
+def destSearch():
+    airport = request.form['destairport']
+    username = session['username']
+    cursor = conn.cursor()
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
+    query = 'SELECT * FROM flight WHERE arrival_airport_name = %s AND airline_name = %s'
+    cursor.execute(query, (airport, airline['airline_name']))
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('staffViewFlights.html', flights=data)
+
+
+@app.route('/dateSearch', methods=['GET', 'POST'])
+def dateSearch():
+    startdate = request.form['startdate']
+    enddate = request.form['enddate']
+
+    username = session['username']
+    cursor = conn.cursor()
+
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
+
+    query = 'SELECT * FROM flight WHERE DATE(departure_date_time) >= %s AND DATE(departure_date_time) <= %s AND airline_name = %s'
+    cursor.execute(query, (startdate, enddate, airline['airline_name']))
+
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('staffViewFlights.html', flights=data)
+
+
+@app.route('/staffViewFlights')
+def staffViewFlights():
+    cursor = conn.cursor()
+    query = '''
+    SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
+    FROM airlineStaff, flight 
+    WHERE airlineStaff.airline_name = flight.airline_name AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
+    '''
+    cursor.execute(query)
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('staffViewFlights.html', flights=data)
+
 # Logout for staff
 @app.route('/staffLogout')
 def logout_staff():

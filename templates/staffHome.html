@@ -9,7 +9,7 @@
 
     <!-- Some of these could be displayed on the user's page too... -->
 
-    <a href="/viewflightsStaff">View flights</a>
+    <a href="/staffViewFlights">View flights</a>
     <br></br>
     <a href="/addFlight">New flight</a>
     <br></br>
@@ -63,7 +63,7 @@
             <td>{{line['arrival_airport_name']}}</td>
             <td>{{line['airplane_ID']}}</td>
             <td>
-                <a href = {{ url_for('passengerList' ,airline_name=line['airline_name'],
+                <a href = {{ url_for('passenger_list' ,airline_name=line['airline_name'],
                 flight_number=line['flight_number'],
                  departure_date_time=line['departure_date_time']) }}> Detail</a>
             </td>
