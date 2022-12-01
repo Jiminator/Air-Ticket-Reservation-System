@@ -10,16 +10,11 @@ def customerHome():
     cursor.execute(query, (email))
     userdata = cursor.fetchone()
     query = """
-            SELECT DISTINCT
-                flight.airline_name, flight.flight_number, flight.departure_date_time, flight.arrival_date_time,
-                flight.flight_status, flight.base_price, flight.departure_airport_name, flight.arrival_airport_name, flight.airplane_ID
-            FROM
-                customer, purchase, ticket NATURAL JOIN flight
-            WHERE
-                customer.email = %s AND customer.email = purchase.email AND purchase.ticket_ID = ticket.ticket_ID AND
-                (DATE(flight.departure_date_time) > CURRENT_DATE() OR (DATE(flight.departure_date_time) = CURRENT_DATE()
-                 AND TIME(flight.departure_date_time) > CURRENT_TIME()));
-        """
+        SELECT DISTINCT *   
+        FROM purchase natural join ticket natural join flight
+        WHERE email=%s 
+        AND departure_date_time > NOW();
+    """
     cursor.execute(query, (email))
     flightdata = cursor.fetchall()
     cursor.close()
@@ -60,13 +55,13 @@ def customerPurchaseUpdate():
     cursor.execute(query, (flightNo))
     values = cursor.fetchall()
 
-
     display = """
         SELECT DISTINCT *   
         FROM flight NATURAL JOIN ticket
         WHERE flight.flight_status != 'cancelled'
         AND departure_date_time > NOW()
     """
+
     cursor.execute(display)
     flightdata = cursor.fetchall()
 
@@ -80,13 +75,13 @@ def customerPurchaseUpdate():
         return render_template('customerPurchase.html', error=message, flights=flightdata)
 
     # this query may need to change because customers should be able to purchase multiple tickets
-    query = 'SELECT * FROM purchase WHERE ticket_ID=%s'
-    cursor.execute(query, ticketID)
+    query = 'SELECT * FROM purchase WHERE ticket_ID=%s AND email=%s'
+    cursor.execute(query, (ticketID, email))
     data = cursor.fetchone()
 
 
+
     if data:
-        # If the previous query returns data, then user exists
         message = "Error: You have already purchased a ticket for this flight"
     else:
         query = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
@@ -96,9 +91,6 @@ def customerPurchaseUpdate():
     cursor.close()
     return render_template('customerPurchase.html', error=message, flights=flightdata)
 
-
-
-
 @app.route('/customerviewflights')
 def customerviewflights():
     email = session['email']
@@ -107,7 +99,7 @@ def customerviewflights():
     SELECT DISTINCT *   
     FROM purchase natural join ticket natural join flight
     WHERE email=%s 
-    #AND departure_date_time > NOW();
+    AND departure_date_time > NOW();
     """
     cursor.execute(query, (email))
     flightdata = cursor.fetchall()
@@ -115,28 +107,68 @@ def customerviewflights():
     return render_template('customerviewflights.html', flights=flightdata)
 
 
-
-
-
-
-
-
-
-
-
-
-
 @app.route('/customerRateflight', methods=['GET', 'POST'])
 def customerRateflights():
     email = session['email']
     cursor = conn.cursor()
     query = """
-    SELECT DISTINCT *   
-    FROM purchase
-    WHERE email=%s;
+        SELECT DISTINCT * FROM purchase NATURAL JOIN 
+        flight NATURAL JOIN ticket
+        WHERE email=%s AND arrival_date_time < NOW();
     """
     cursor.execute(query, (email))
     flightdata = cursor.fetchall()
     cursor.close()
     return render_template('customerRateflight.html', flights=flightdata)
+
+
+@app.route('/customerRateflightUpdate', methods=['GET', 'POST'])
+def customerRateflightsUpdate():
+    email = session['email']
+    cursor = conn.cursor()
+    display = """
+    SELECT DISTINCT * FROM purchase NATURAL JOIN 
+    flight NATURAL JOIN ticket
+    WHERE email=%s AND arrival_date_time < NOW();
+    """
+    cursor.execute(display, (email))
+    flightdata = cursor.fetchall()
+
+    flightNo = request.form['flightNo']
+    review = request.form["review"]
+    rating = request.form['Rating']
+
+    #all the valid flights that the user can rate are stored in valid_flights
+    valid_flights = []
+    index = 0
+    for i, value in enumerate(flightdata):
+        curr = value['flight_number']
+        valid_flights.append(curr)
+        if flightdata[i]['flight_number'] == flightNo:
+            index = i
+    
+
+
+
+    #checks if the inputted flight number is valid
+    if flightNo in valid_flights:
+        airline_name = flightdata[index]['airline_name']
+        departure_date_time = flightdata[index]['departure_date_time']
+
+        #checks if the user has already given a rating for that flight
+        prevRatings = "SELECT * FROM interact WHERE email=%s AND flight_number=%s AND airline_name=%s"
+        cursor.execute(prevRatings, (email, flightNo, airline_name))
+        prevRatings = cursor.fetchall()
+        if not prevRatings:
+            query = "INSERT INTO interact VALUES (%s, %s, %s ,%s, %s, %s)"
+            cursor.execute(query, (email, airline_name, departure_date_time, flightNo, review, rating))
+            conn.commit()
+            message = "Success: this is confirmation of your review"
+        else:
+            message = 'You have already given the flight a rating'
+    else:
+        message = "That is an invalid flight number"
+    cursor.close()
+    return render_template('customerRateflight.html', error=message, flights=flightdata)
+
 

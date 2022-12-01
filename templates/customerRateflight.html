@@ -14,14 +14,13 @@
         }
     </style>
 
-    Available Flights to Purchase From:
+    Your Past Flights:
     <table>
         <th>Base Price</th>
         <th>Airline</th>
         <th>Flight No.</th>
         <th>Departure Date & Time</th>
         <th>Arrival Date & Time</th>
-        <th>Status</th>
         <th>Departure Airport</th>
         <th>Arrival Airport</th>
 
@@ -32,7 +31,6 @@
             <td>{{line['flight_number']}}</td>
             <td>{{line['departure_date_time']}}</td>
             <td>{{line['arrival_date_time']}}</td>
-            <td>{{line['flight_status']}}</td>
             <td>{{line['departure_airport_name']}}</td>
             <td>{{line['arrival_airport_name']}}</td>
         </tr>
@@ -40,21 +38,24 @@
         {% endfor %}
     </table></br>
 
-    <form action="/customerPurchase" method="POST">
+    <form action="/customerRateflightUpdate" method="POST">
     <fieldset>
         <legend><b>Rate Your Previous Flight</b></legend>
+        <b>Which Flight Do You Want to Review:</br></b>
+        <input type="text" name="flightNo" placeholder="Enter the flight number" maxlength="225" required /></br>
         <b>Flight Information:</br></b>
-        <input type="text" name="review" placeholder="Write Your Review Here" maxlength="255" /> </br>
-
+        <textarea placeholder="Write Your Review Here" rows = "5" cols = "60" name = "review" maxlength="255" required></textarea><br>
+        <b>Rate your flight experience (1 to 10)</br></b>
+        <input type="number" id="rating" name="Rating" min="1" max="10" required>
+        <br></br>
         <form action="/customerPurchase" class="inline">
             <button class="submit-button" >Submit</button>
         </form>
-    
-    </fieldset>
-
         {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
         {% endif %}
+    </fieldset>
+
     </form>
 
     <a href="/customerHome">Go back</a>

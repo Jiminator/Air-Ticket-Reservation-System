@@ -30,30 +30,26 @@
     <b>My upcoming flights:</b>
     <table>
         <th>Airline</th>
-        <th>Flight No.</th>
-        <th>Departure Date</th>
-        <th>Departure Time</th>
-        <th>Arrival Date</th>
-        <th>Arrival Time</th>
+        <th>Flight Number</th>
         <th>Status</th>
-        <th>Base Price</th>
+        <th>Departure Date/Time</th>
+        <th>Arrival Date/Time</th>
         <th>Departure Airport</th>
         <th>Arrival Airport</th>
-        <th>Airplane</th>
+        <th>Ticket Price</th>
+        <th>Purchase Date & Time</th>
 
         {% for line in flights %}
         <tr>
             <td>{{line['airline_name']}}</td>
-            <td>{{line['flight_num']}}</td>
-            <td>{{line['depart_date']}}</td>
-            <td>{{line['depart_time']}}</td>
-            <td>{{line['arrive_date']}}</td>
-            <td>{{line['arrive_time']}}</td>
+            <td>{{line['flight_number']}}</td>
             <td>{{line['flight_status']}}</td>
-            <td>${{line['base_price']}}</td>
-            <td>{{line['depart_airport']}}</td>
-            <td>{{line['arrive_airport']}}</td>
-            <td>{{line['airplane_ID']}}</td>
+            <td>{{line['departure_date_time']}}</td>
+            <td>{{line['arrival_date_time']}}</td>
+            <td>{{line['departure_airport_name']}}</td>
+            <td>{{line['arrival_airport_name']}}</td>
+            <td>${{line['sold_price']}}</td>
+            <td>{{line['purchase_date_time']}}</td>
         </tr>
         {% endfor %}
     </table></br>
