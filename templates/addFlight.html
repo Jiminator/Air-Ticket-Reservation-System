@@ -1,0 +1,108 @@
+<html>
+<head>
+    <h1>
+        NYU Tandon Airline Database System
+    </h1>
+</head>
+
+
+
+<body>
+    Upcoming flights:
+
+    <style type="text/css">
+        table, th, td {
+            border: 1px solid black;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+    </style>
+
+    <table>
+        <th>Airline</th>
+        <th>Flight No.</th>
+        <th>Departure Date/Time</th>
+        <th>Arrival Date/Time</th>
+        <th>Status</th>
+        <th>Base Price</th>
+        <th>Departure Airport</th>
+        <th>Arrival Airport</th>
+        <th>Airplane</th>
+
+        {% for line in flights %}
+        <tr>
+            <td>{{line['airline_name']}}</td>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date_time']}}</td>
+            <td>{{line['arrival_date_time']}}</td>
+            <td>{{line['flight_status']}}</td>
+            <td>${{line['base_price']}}</td>
+            <td>{{line['departure_airport_name']}}</td>
+            <td>{{line['arrival_airport_name']}}</td>
+            <td>{{line['airplane_ID']}}</td>
+        </tr>
+        {% endfor %}
+    </table></br>
+
+    <h2>
+        Add new flight
+    </h2>
+    <form action="/addFlightResult" method="POST">
+
+        <label for="flight_number">Flight num:</label>
+        <input type="text" name="flight_number" maxlength="5" required /></br></br>
+
+        <label for="departure_airport_name">Depart airport:</label>
+        <select name="departure_airport_name">
+            {% for line in airport %}
+            <option value="{{ line.airport_name }}">{{ line.airport_name }}</option>
+            {% endfor %}
+        </select></br></br>
+
+        <label for="arrival_airport_name">Arrive airport:</label>
+        <select name="arrival_airport_name">
+            {% for line in airport %}
+            <option value="{{ line.airport_name }}">{{ line.airport_name }}</option>
+            {% endfor %}
+        </select></br></br>
+
+        <label for="departure_date_time">Depart date:</label>
+        <input type="datetime" name="departure_date_time" placeholder="yyyy-mm-dd 00:00:00" required /></br></br>
+
+{#        <label for="deptime">Depart time:</label>#}
+{#        <input type="time" name="deptime" placeholder="00:00:00" required /></br></br>#}
+
+        <label for="arrival_date_time">Arrive date:</label>
+        <input type="datetime" name="arrival_date_time" placeholder="yyyy-mm-dd 00:00:00" required /></br></br>
+{##}
+{#        <label for="arrtime">Arrive time:</label>#}
+{#        <input type="time" name="arrtime" placeholder="00:00:00" required /></br></br>#}
+
+        <label for="status">Flight status:</label>
+        <select name="status">
+            <option value="on-time">On-time</option>
+            <option value="delayed">Delayed</option>
+            <option value="cancelled">Cancelled</option>
+        </select></br></br>
+
+        <label for="price">Base price:</label>
+        <input type="number" name="price" placeholder="0.00" required /></br></br>
+
+        <label for="airplaneID">Airplane ID:</label>
+        <select name="airplaneID">
+            {% for line in ID %}
+            <option value="{{ line.airplane_ID }}">{{ line.airplane_ID }}</option>
+            {% endfor %}
+        </select></br></br>
+
+        <input type="submit" value=Add />
+		{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+		{% endif %}
+	</form>
+
+    <a href="/staffHome">Go back</a>
+
+</body>
+
+</html>
