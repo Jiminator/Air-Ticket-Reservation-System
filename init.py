@@ -7,6 +7,7 @@ import login
 import flight
 import register
 import staff
+import status
 
 
 # Index page

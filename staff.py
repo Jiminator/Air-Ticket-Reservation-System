@@ -148,6 +148,7 @@ def staffViewFlights():
     cursor.close()
     return render_template('staffViewFlights.html', flights=data)
 
+
 # Logout for staff
 @app.route('/staffLogout')
 def logout_staff():
