@@ -21,6 +21,72 @@ def customerHome():
     return render_template('customerHome.html', customer=userdata, flights=flightdata)
 
 
+
+
+
+
+@app.route('/customerviewflights', methods=['GET', 'POST'])
+def customerviewflights():
+    email = session['email']
+    cursor = conn.cursor()
+    display = """
+    SELECT DISTINCT *   
+    FROM purchase natural join ticket natural join flight
+    WHERE email=%s 
+    AND departure_date_time > NOW();
+    """
+    cursor.execute(display, (email))
+    flightdata = cursor.fetchall()
+    cursor.close()
+    return render_template('customerviewflights.html', flights=flightdata)
+
+
+@app.route('/customerviewflightsUpdate', methods=['GET', 'POST'])
+def customerviewflightsUpdate():
+    email = session['email']
+    cursor = conn.cursor()
+
+    departPort = request.form['departureairport']
+    arrivPort = request.form["arrivalairport"]
+    departdate = request.form["departdate"]
+    returndate = request.form["returndate"]
+
+    filter = """
+    SELECT DISTINCT *   
+    FROM purchase natural join ticket natural join flight
+    WHERE email=%s AND departure_date_time > NOW()"""
+    variables = [email]
+    if departPort:
+        filter += ' AND departure_airport_name=%s'
+        variables.append(departPort)
+    if arrivPort:
+        filter += ' AND arrival_airport_name=%s'
+        variables.append(arrivPort)
+    if departdate:
+        filter += ' AND departure_date_time > %s'
+        variables.append(departdate)
+    if returndate:
+        filter += ' AND arrival_date_time < %s'
+        variables.append(returndate)
+
+    # filtering by date is UNTESTED!!!
+    cursor.execute(filter, tuple(variables))
+    display = cursor.fetchall()
+
+
+    cursor.close()
+    return render_template('customerviewflights.html', flights=display)
+
+
+
+
+
+
+
+
+
+
+
 # Logout for customers and agents
 @app.route('/customerLogout')
 def logoutCustomer():
@@ -65,46 +131,41 @@ def customerPurchaseUpdate():
     cursor.execute(display)
     flightdata = cursor.fetchall()
 
-    if values:
-        values = values[0]
-        cost = values['base_price']
-        ticketID = values['ticket_ID']
-    else:
+    # checks if the ticket ID is exists
+    if not values:
         message = "Error: that ticket does not exist in our system. Please enter a valid ticket"
         cursor.close()
         return render_template('customerPurchase.html', error=message, flights=flightdata)
-
+    ticketID = values[0]['ticket_ID']
     # this query may need to change because customers should be able to purchase multiple tickets
+    # this query will check if the user bought the ticket. 
     query = 'SELECT * FROM purchase WHERE ticket_ID=%s AND email=%s'
     cursor.execute(query, (ticketID, email))
     data = cursor.fetchone()
 
 
-
+    # if the query returns things then the user has already bought the ticket
     if data:
         message = "Error: You have already purchased a ticket for this flight"
     else:
+        numTickets = """
+        SELECT count(ticket_ID) as seats_taken, ticket_ID, airline_name, airplane_ID, flight_number, number_of_seats, base_price 
+        FROM airplane NATURAL JOIN purchase NATURAL JOIN ticket NATURAL JOIN flight    
+        WHERE ticket_ID=%s;
+        """
+        cursor.execute(numTickets, (ticketID))
+        data = cursor.fetchone()
+        cost = data['base_price']
+        seatsTaken = data['seats_taken']
+        totalSeats = data['number_of_seats']
+        if seatsTaken >= (totalSeats * 0.6):
+            cost = float(cost) * 1.25
         query = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
         cursor.execute(query, (ticketID, email, cost, cardType, cardNumber,name, expDate))
         conn.commit()
         message = "Success: this is confirmation of your purchase"
     cursor.close()
     return render_template('customerPurchase.html', error=message, flights=flightdata)
-
-@app.route('/customerviewflights')
-def customerviewflights():
-    email = session['email']
-    cursor = conn.cursor()
-    query = """
-    SELECT DISTINCT *   
-    FROM purchase natural join ticket natural join flight
-    WHERE email=%s 
-    AND departure_date_time > NOW();
-    """
-    cursor.execute(query, (email))
-    flightdata = cursor.fetchall()
-    cursor.close()
-    return render_template('customerviewflights.html', flights=flightdata)
 
 
 @app.route('/customerRateflight', methods=['GET', 'POST'])
