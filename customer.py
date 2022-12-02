@@ -1,4 +1,18 @@
 from app import *
+from datetime import datetime, date
+
+
+
+def yearmonthday(date):
+    return str(date).split('-')
+
+def getNoMonths(d1, d2):
+    d1 = datetime.strptime(d1, "%Y-%m-%d")
+    d2 = datetime.strptime(d2, "%Y-%m-%d") 
+    noMonths = (d2.year - d1.year) * 12 + d2.month - d1.month + 1
+    if noMonths < 1:
+        noMonths = 1
+    return noMonths
 
 
 # Home page for customer
@@ -20,11 +34,6 @@ def customerHome():
     cursor.close()
     return render_template('customerHome.html', customer=userdata, flights=flightdata)
 
-
-
-
-
-
 @app.route('/customerviewflights', methods=['GET', 'POST'])
 def customerviewflights():
     email = session['email']
@@ -39,7 +48,6 @@ def customerviewflights():
     flightdata = cursor.fetchall()
     cursor.close()
     return render_template('customerviewflights.html', flights=flightdata)
-
 
 @app.route('/customerviewflightsUpdate', methods=['GET', 'POST'])
 def customerviewflightsUpdate():
@@ -76,16 +84,6 @@ def customerviewflightsUpdate():
 
     cursor.close()
     return render_template('customerviewflights.html', flights=display)
-
-
-
-
-
-
-
-
-
-
 
 # Logout for customers and agents
 @app.route('/customerLogout')
@@ -247,34 +245,40 @@ def customerSpending():
 
     # this query will get the total purchases
     # from current to last year
-    yearCost = """
-    SELECT SUM(sold_price) as yearCost  
+    totalCost = """
+    SELECT SUM(sold_price) as totalCost  
     FROM purchase natural join ticket natural join flight
     WHERE email=%s
     AND purchase_date_time>=date_sub(now(), interval 1 year) 
     """
-    cursor.execute(yearCost, (email))
-    yearCost = cursor.fetchone()
+    cursor.execute(totalCost, (email))
+    totalCost = cursor.fetchone()
 
     # I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
     months = [None, "January", "February", "March", "April", "May", "June", "July", 
             "August", "September", "October", "November", "December"]
     
-    getTime = 'SELECT YEAR(NOW()) as year, MONTH(NOW()) as month;'
+
+    getTime = 'SELECT YEAR(NOW()) as year, MONTH(NOW()) as month, DAY(NOW()) as day;'
     cursor.execute(getTime)
     getTime = cursor.fetchone()
-    year = getTime['year']
-    month = int(getTime['month'])
-    if month >= 6:
-        display_months = [mnth for mnth in months[month:month-6:-1]]
+
+    currYear = getTime['year']
+    currMonth = int(getTime['month'])
+    currDay = getTime['day']
+
+
+
+    if currMonth >= 6:
+        display_months = [mnth for mnth in months[currMonth:currMonth-6:-1]]
     else:
-        display_months = [mnth for mnth in months[month:0:-1]]
-        month = 6 - month + 1
-        display_months.extend([mnth for mnth in months[len(months):len(months)-month:-1]])
+        display_months = [mnth for mnth in months[currMonth:0:-1]]
+        currMonth = 6 - currMonth + 1
+        display_months.extend([mnth for mnth in months[len(months):len(months)-currMonth:-1]])
 
     index = tuple([months.index(i) for i in display_months])
 
-
+    #default 6 months
     pastSixMonths = """
     select SUM(sold_price) as sixMonthCost from purchase
     where email=%s
@@ -295,12 +299,13 @@ def customerSpending():
         val = cursor.fetchone()['price']
         if val:
             val = float(val)
-            percents.append([val, (val/pastSixMonths) * 100])
+            percents.append(["{:.2f}".format(val), "{:.2f}".format((val/pastSixMonths) * 100 + 5)])
         else:
-            percents.append([0, 0])
+            percents.append([0, 5])
 
-
-    return render_template('customerSpending.html', yearCost=yearCost, display_months=display_months, pastSixMonths=pastSixMonths, percents=percents)
+    indexes = [i for i in range(len(display_months))]
+    return render_template('customerSpending.html', totalCost=totalCost, display_months=display_months, 
+    pastSixMonths=pastSixMonths, percents=percents, year=currYear, day=currDay, indexes=indexes)
 
 
 
@@ -313,72 +318,137 @@ def customerSpending():
 
 @app.route('/customerSpendingUpdate', methods=['GET', 'POST'])
 def customerSpendingUpdate():
-    """ 
-    Default view will be total amount of money spent in the past year and a bar
-    chart/table showing month wise money spent for last 6 months. He/she will also have option to specify
-    a range of dates to view total amount of money spent within that range and a bar chart/table showing
-    month wise money spent within that range.
-    """
+
+    # part1 get user inputs
+    filter_begin_date = request.form['Start Date']
+    filter_end_date = request.form['End Date']
     email = session['email']
+
     cursor = conn.cursor()
 
-    # this query will get the total purchases
-    # from current to last year
-    yearCost = """
-    SELECT SUM(sold_price) as yearCost  
+    variables = [email]
+
+    # part2 get the total cost
+    totalCost = """
+    SELECT SUM(sold_price) as totalCost  
     FROM purchase natural join ticket natural join flight
     WHERE email=%s
-    AND YEAR(purchase_date_time) >= YEAR(NOW())-1 
-    AND YEAR(purchase_date_time) <= YEAR(NOW());
     """
-    cursor.execute(yearCost, (email))
-    yearCost = cursor.fetchone()
+
+    # make query more specific if the user gives us the dates
+    if '' in [filter_begin_date, filter_end_date]:
+        if filter_begin_date != '':
+            totalCost += ' AND purchase_date_time>=%s'
+            variables.append(filter_begin_date)
+        if filter_end_date != '':
+            totalCost += ' AND purchase_date_time<=%s'
+            variables.append(filter_end_date)
+    else:
+        # if doesn't input anything then default to 1 year.
+        totalCost += ' AND purchase_date_time>=date_sub(now(), interval 1 year) '
+
+    cursor.execute(totalCost, tuple(variables))
+    totalCost = cursor.fetchone()
 
     # I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
     months = [None, "January", "February", "March", "April", "May", "June", "July", 
             "August", "September", "October", "November", "December"]
+  
+
+                                
+
+    query = 'select DATE(NOW()) as date'
+    cursor.execute(query)
+    today_date = cursor.fetchone()['date'] 
+    # Setting start date to default ===== current date 
+    if filter_end_date == '':
+        filter_end_date = today_date
+    # Setting begin date to default ===== current date - 6 months 
+    if filter_begin_date == "": 
+        query = 'select DATE(date_sub(now(), interval 6 month)) as date'
+        cursor.execute(query)
+        filter_begin_date = cursor.fetchone()['date']  
+
+    #noMonths will be the number of months difference between begin and end date.
+    noMonths = getNoMonths(str(filter_begin_date), str(filter_end_date))
+
+    byear,bmonth,bday = yearmonthday(filter_begin_date)
+    eyear,emonth,eday = yearmonthday(filter_end_date)
+
+    display_months = []
+    tyear,tmonth,tday = int(eyear),int(emonth),int(eday)
+    for i in range(noMonths):
+        if tmonth == 0:
+            tmonth = 12
+            tyear -= 1
+        
+        temp = months[tmonth] + ' ' + str(tyear)
+        display_months.append(temp)
+        tmonth -= 1
+
+    # when the loop is finished it should look like this
+    # display_months looks like ['December 2022', 'November 2022', 'October 2022', 'September 2022', 'August 2022', 'July 2022', 'June 2022', 'May 2022', 'April 2022', 'March 2022', 'February 2022', 'January 2022']        
+    # this will be the x axis
     
-    getTime = 'SELECT YEAR(NOW()) as year, MONTH(NOW()) as month;'
-    cursor.execute(getTime)
-    getTime = cursor.fetchone()
-    year = getTime['year']
-    month = int(getTime['month'])
-    if month >= 6:
-        display_months = [mnth for mnth in months[month:month-6:-1]]
-    else:
-        display_months = [mnth for mnth in months[month:0:-1]]
-        month = 6 - month + 1
-        display_months.extend([mnth for mnth in months[len(months):len(months)-month:-1]])
-
-
-
-    sixMonths = """
-    SELECT SUM(sold_price) as yearCost  
-    FROM purchase natural join ticket natural join flight
-    WHERE email=%s
-    AND YEAR(purchase_date_time) = YEAR(NOW())
-    AND MONTH(purchase_date_time) = MONTH(NOW())
+    pastXmonths = """
+    select SUM(sold_price) as pastXmonths from purchase
+    where email=%s
+    AND purchase_date_time>=date_sub(now(), interval %s month)
     """
+    cursor.execute(pastXmonths, (email, noMonths))
+    #pastXMonths should contain the total number of money spent throught the
+    #specified period of time, or by default 6 months
+    pastXmonths = float(cursor.fetchone()['pastXmonths'])
 
 
-    return render_template('customerSpendingUpdate.html', yearCost=yearCost, display_months=display_months)
+
+    #CALCULATING THE PERCENTS
+
+    monthYear = []
+    percents = []
+    valsOnly=[]
+    for i in display_months:
+        i = i.split()
+        i.append(months.index(i[0]))
+        monthYear.append(i)
+
+    for i in monthYear:
+        print(i)
+        percent = """
+        select SUM(sold_price) as price from purchase
+        where email=%s
+        AND YEAR(purchase_date_time)=%s
+        AND MONTH(purchase_date_time)=%s
+        """
+        cursor.execute(percent, (email, str(i[1]), str(i[2])))
+        val = cursor.fetchone()['price']
+        if val:
+            val = float(val)
+            percents.append(["{:.2f}".format(val), "{:.2f}".format((val/pastXmonths) * 100)])
+            valsOnly.append("{:.2f}".format(val))
+        else:
+            percents.append([0, 1])
+            valsOnly.append("{:.2f}".format(0))
+
+        #percents is formatted so that percents[0] is the $$ and percents[1] is the %%
+
+
+    print(f'''
+    
+    
+    LOOK HERE    {filter_begin_date}
+    LOOK HERE 1   {filter_end_date}
+    LOOK HERE 2   {noMonths}
+    ddd            {display_months}
+    what is this   {valsOnly}
+    
+    
+    ''')
+    return render_template('customerSpending.html', totalCost=totalCost, display_months=display_months, 
+   percents=percents, pastXmonths=pastXmonths,valsOnly=valsOnly)
 
 
 
-@app.route('/customerSpendingIFRAME', methods=['GET', 'POST'])
-def customerSpendingIFRAME():
-    email = session['email']
-    cursor = conn.cursor()
-    display = """
-    SELECT DISTINCT *   
-    FROM purchase natural join ticket natural join flight
-    WHERE email=%s 
-    ORDER BY ticket.departure_date_time DESC
-    """
-    cursor.execute(display, (email))
-    flightdata = cursor.fetchall()
-    cursor.close()
-    return render_template('customerSpendingIFRAME.html', flights=flightdata)
 
 
 
