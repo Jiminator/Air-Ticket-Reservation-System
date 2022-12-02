@@ -14,11 +14,40 @@ def getNoMonths(d1, d2):
         noMonths = 1
     return noMonths
 
+def removeFromDisplay(display, val):
+    newdisplay=[]
+    for checkflight in display:
+        flag = True
+        for currFlight in val:
+            if str(checkflight['ticket_ID']) == str(currFlight['ticket_ID']):
+                # if ticket_ids match then the person owns the ticket already
+                flag = False
+        if flag:
+            newdisplay.append(checkflight)
+
+    print(f'''
+    
+    
+    THIS RAN {newdisplay}
+
+    Purcahses {val}
+
+    display {display}
+    
+    
+    ''')
+    return newdisplay
+
+
 
 # Home page for customer
 @app.route('/customerHome')
 def customerHome():
-    email = session['email']
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
     query = 'SELECT * FROM customer WHERE email = %s'
     cursor.execute(query, (email))
@@ -36,7 +65,11 @@ def customerHome():
 
 @app.route('/customerviewflights', methods=['GET', 'POST'])
 def customerviewflights():
-    email = session['email']
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
     display = """
     SELECT DISTINCT *   
@@ -51,7 +84,11 @@ def customerviewflights():
 
 @app.route('/customerviewflightsUpdate', methods=['GET', 'POST'])
 def customerviewflightsUpdate():
-    email = session['email']
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
 
     departPort = request.form['departureairport']
@@ -89,86 +126,165 @@ def customerviewflightsUpdate():
 @app.route('/customerLogout')
 def logoutCustomer():
     session.pop('email')
-    return redirect('customerLogin')
+    message = 'You have Successfully Logged Out'
+    return render_template('customerLogin.html', error=message)
 
 @app.route('/customerPurchase', methods=['GET', 'POST'])
-def customerPurchase():
+def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',expDate =''):
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
-    query = """
-    SELECT DISTINCT *   
-    FROM flight NATURAL JOIN ticket
-    WHERE flight.flight_status != 'cancelled'
-    AND departure_date_time > NOW()
+
+    # This query will give us all of our purchases
+    purchases = """
+        SELECT * FROM purchase NATURAL JOIN ticket NATURAL JOIN flight
+        WHERE email = %s
+        AND departure_date_time >= NOW();
     """
-    cursor.execute(query)
-    flightdata = cursor.fetchall()
+    cursor.execute(purchases, (email))
+    purchases = cursor.fetchall()
+
+
+    # Only will filter the tickets that aren't cancelled and 
+    # are in the future. DOESN"T CHECK if the number of seats
+    filter1 = """
+        SELECT DISTINCT *   
+        FROM flight NATURAL JOIN ticket NATURAL JOIN airplane 
+        WHERE flight.flight_status != 'cancelled'
+        AND departure_date_time > NOW()
+    """
+    cursor.execute(filter1)
+    filter1 = cursor.fetchall()
+
+    finalDisplay = []
+    validTicketID = []
+    # We will now check for the number of seats
+    for flight in filter1:
+        numTickets = """
+            SELECT count(ticket_ID) as seats_taken, ticket_ID, airline_name, airplane_ID, flight_number, number_of_seats, base_price 
+            FROM airplane NATURAL JOIN purchase NATURAL JOIN ticket NATURAL JOIN flight    
+            WHERE ticket_ID=%s;
+        """
+        cursor.execute(numTickets, (flight['ticket_ID']))
+        numTickets = cursor.fetchone()
+        cost = numTickets['base_price']
+        seatsTaken = numTickets['seats_taken']
+        totalSeats = numTickets['number_of_seats']
+        if seatsTaken >= (totalSeats * 0.6):
+            cost = float(cost) * 1.250
+            flight['base_price'] = float(cost)
+        if seatsTaken < totalSeats:
+            finalDisplay.append(flight)
+            validTicketID.append(flight['ticket_ID'])
+    # finalDisplay will have all the available flights for purchase that
+    # are Not full, Not cancelled, and Not previous flight
+
+    finalDisplay = removeFromDisplay(finalDisplay, purchases)
+
+    # finalDisplay will have all the available flights for purchase that
+    # are Not full, Not cancelled, Not previous flight, AND NOT owned!!!
+
+    message = None
+    flag = False
+    if ticketID and int(ticketID) in validTicketID:
+        checkForRepurchase = 'SELECT * FROM purchase WHERE ticket_ID=%s AND email=%s'
+        cursor.execute(checkForRepurchase, (ticketID, email))
+        checkForRepurchase = cursor.fetchone()
+        #checks for repurchase error
+        if checkForRepurchase:
+            message = "Error: You have already purchased a ticket for this flight"
+        else:
+            purchase = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
+            cursor.execute(purchase, (ticketID, email, cost, cardType, cardNumber,name, expDate))
+            conn.commit()
+            message = "Success: this is confirmation of your purchase"
+            flag = True
+    elif ticketID:
+        message = "You have already purchased this ticket!"
+    
     cursor.close()
-    return render_template('customerPurchase.html', flights=flightdata)
+    return render_template('customerPurchase.html', flights=finalDisplay, error=message, flag=flag)
 
 @app.route('/customerPurchaseUpdate', methods=['GET', 'POST'])
 def customerPurchaseUpdate():
-    email = session['email']
-    flightNo = request.form['flightNo']
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
+    ticketID = request.form['ticketID']
     cardType = request.form["card type"]
     name = request.form['Name of Card']
     cardNumber = request.form['cc-number']
     expDate = request.form["expiration start"]
+    return customerPurchase(ticketID, cardType, name , cardNumber,expDate)
 
+
+@app.route('/customerDelete', methods=['GET', 'POST'])
+def customerDelete():
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
-    query = 'SELECT base_price, ticket_ID FROM flight NATURAL JOIN ticket WHERE flight_number=%s'
-    cursor.execute(query, (flightNo))
-    values = cursor.fetchall()
-
-    display = """
-        SELECT DISTINCT *   
-        FROM flight NATURAL JOIN ticket
-        WHERE flight.flight_status != 'cancelled'
-        AND departure_date_time > NOW()
+    available = """
+    SELECT * FROM purchase NATURAL JOIN ticket NATURAL JOIN flight
+    WHERE email = %s
+    AND departure_date_time >= NOW() - INTERVAL 1 DAY;
     """
+    cursor.execute(available, (email))
+    flightdata = cursor.fetchall()
+    try:
+        ticket_ID = request.form['ticket_ID']
+    except Exception:
+        ticket_ID = None
 
-    cursor.execute(display)
+    isvalid = [str(ticketIDs['ticket_ID']) for ticketIDs in flightdata]
+    message= ''
+    if ticket_ID:
+        if ticket_ID in isvalid:
+            deleteQuery = """
+                DELETE FROM purchase 
+                WHERE ticket_ID=%s
+                AND email=%s
+            """
+            cursor.execute(deleteQuery, (ticket_ID, email))
+            conn.commit()
+            message = f'TicketID: {ticket_ID} has been cancelled'
+            checker = True
+        else:
+            checker = False
+            message = 'This is an inalid ticketID. Please submit an ID that is from the list above. If the list is empty then you cannot cancel any tickets'
+    else:
+        checker = False
+    
+
+    available = """
+    SELECT * FROM purchase NATURAL JOIN ticket NATURAL JOIN flight
+    WHERE email = %s
+    AND departure_date_time >= NOW() - INTERVAL 1 DAY;
+    """
+    cursor.execute(available, (email))
     flightdata = cursor.fetchall()
 
-    # checks if the ticket ID is exists
-    if not values:
-        message = "Error: that ticket does not exist in our system. Please enter a valid ticket"
-        cursor.close()
-        return render_template('customerPurchase.html', error=message, flights=flightdata)
-    ticketID = values[0]['ticket_ID']
-    # this query may need to change because customers should be able to purchase multiple tickets
-    # this query will check if the user bought the ticket. 
-    query = 'SELECT * FROM purchase WHERE ticket_ID=%s AND email=%s'
-    cursor.execute(query, (ticketID, email))
-    data = cursor.fetchone()
-
-
-    # if the query returns things then the user has already bought the ticket
-    if data:
-        message = "Error: You have already purchased a ticket for this flight"
-    else:
-        numTickets = """
-        SELECT count(ticket_ID) as seats_taken, ticket_ID, airline_name, airplane_ID, flight_number, number_of_seats, base_price 
-        FROM airplane NATURAL JOIN purchase NATURAL JOIN ticket NATURAL JOIN flight    
-        WHERE ticket_ID=%s;
-        """
-        cursor.execute(numTickets, (ticketID))
-        data = cursor.fetchone()
-        cost = data['base_price']
-        seatsTaken = data['seats_taken']
-        totalSeats = data['number_of_seats']
-        if seatsTaken >= (totalSeats * 0.6):
-            cost = float(cost) * 1.25
-        query = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
-        cursor.execute(query, (ticketID, email, cost, cardType, cardNumber,name, expDate))
-        conn.commit()
-        message = "Success: this is confirmation of your purchase"
     cursor.close()
-    return render_template('customerPurchase.html', error=message, flights=flightdata)
+    return render_template('customerDelete.html', flights=flightdata, checker=checker,error=message, success=message)  
+
+
+
 
 
 @app.route('/customerRateflight', methods=['GET', 'POST'])
 def customerRateflights():
-    email = session['email']
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
     query = """
         SELECT DISTINCT * FROM purchase NATURAL JOIN 
@@ -183,7 +299,11 @@ def customerRateflights():
 
 @app.route('/customerRateflightUpdate', methods=['GET', 'POST'])
 def customerRateflightsUpdate():
-    email = session['email']
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
     display = """
     SELECT DISTINCT * FROM purchase NATURAL JOIN 
@@ -233,103 +353,19 @@ def customerRateflightsUpdate():
 
 
 @app.route('/customerSpending', methods=['GET', 'POST'])
-def customerSpending():
-    """ 
-    Default view will be total amount of money spent in the past year and a bar
-    chart/table showing month wise money spent for last 6 months. He/she will also have option to specify
-    a range of dates to view total amount of money spent within that range and a bar chart/table showing
-    month wise money spent within that range.
-    """
-    email = session['email']
-    cursor = conn.cursor()
-
-    # this query will get the total purchases
-    # from current to last year
-    totalCost = """
-    SELECT SUM(sold_price) as totalCost  
-    FROM purchase natural join ticket natural join flight
-    WHERE email=%s
-    AND purchase_date_time>=date_sub(now(), interval 1 year) 
-    """
-    cursor.execute(totalCost, (email))
-    totalCost = cursor.fetchone()
-
-    # I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
-    months = [None, "January", "February", "March", "April", "May", "June", "July", 
-            "August", "September", "October", "November", "December"]
-    
-
-    getTime = 'SELECT YEAR(NOW()) as year, MONTH(NOW()) as month, DAY(NOW()) as day;'
-    cursor.execute(getTime)
-    getTime = cursor.fetchone()
-
-    currYear = getTime['year']
-    currMonth = int(getTime['month'])
-    currDay = getTime['day']
-
-
-
-    if currMonth >= 6:
-        display_months = [mnth for mnth in months[currMonth:currMonth-6:-1]]
-    else:
-        display_months = [mnth for mnth in months[currMonth:0:-1]]
-        currMonth = 6 - currMonth + 1
-        display_months.extend([mnth for mnth in months[len(months):len(months)-currMonth:-1]])
-
-    index = tuple([months.index(i) for i in display_months])
-
-    #default 6 months
-    pastSixMonths = """
-    select SUM(sold_price) as sixMonthCost from purchase
-    where email=%s
-    AND purchase_date_time>=date_sub(now(), interval 6 month)
-    """
-    cursor.execute(pastSixMonths, (email))
-    pastSixMonths = float(cursor.fetchone()['sixMonthCost'])
-
-    percents = []
-    for i in index:
-        percent = """
-        select SUM(sold_price) as price from purchase
-        where email=%s
-        AND purchase_date_time>=date_sub(now(), interval 6 month)
-        AND MONTH(purchase_date_time)=%s;
-        """
-        cursor.execute(percent, (email, str(i)))
-        val = cursor.fetchone()['price']
-        if val:
-            val = float(val)
-            percents.append(["{:.2f}".format(val), "{:.2f}".format((val/pastSixMonths) * 100 + 5)])
-        else:
-            percents.append([0, 5])
-
-    indexes = [i for i in range(len(display_months))]
-    return render_template('customerSpending.html', totalCost=totalCost, display_months=display_months, 
-    pastSixMonths=pastSixMonths, percents=percents, year=currYear, day=currDay, indexes=indexes)
-
-
-
-
-
-
-
-
-
-
-@app.route('/customerSpendingUpdate', methods=['GET', 'POST'])
-def customerSpendingUpdate():
-
-    # part1 get user inputs
-    filter_begin_date = request.form['Start Date']
-    filter_end_date = request.form['End Date']
-    email = session['email']
+def customerSpending(filter_begin_date='', filter_end_date=''):
+    try:
+        email = session['email']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
 
     cursor = conn.cursor()
 
     variables = [email]
 
     # part2 get the total cost
-    totalCost = """
+    totalCostYear = """
     SELECT SUM(sold_price) as totalCost  
     FROM purchase natural join ticket natural join flight
     WHERE email=%s
@@ -338,17 +374,17 @@ def customerSpendingUpdate():
     # make query more specific if the user gives us the dates
     if '' in [filter_begin_date, filter_end_date]:
         if filter_begin_date != '':
-            totalCost += ' AND purchase_date_time>=%s'
+            totalCostYear += ' AND purchase_date_time>=%s'
             variables.append(filter_begin_date)
         if filter_end_date != '':
-            totalCost += ' AND purchase_date_time<=%s'
+            totalCostYear += ' AND purchase_date_time<=%s'
             variables.append(filter_end_date)
     else:
         # if doesn't input anything then default to 1 year.
-        totalCost += ' AND purchase_date_time>=date_sub(now(), interval 1 year) '
+        totalCostYear += ' AND purchase_date_time>=date_sub(now(), interval 1 year) '
 
-    cursor.execute(totalCost, tuple(variables))
-    totalCost = cursor.fetchone()
+    cursor.execute(totalCostYear, tuple(variables))
+    totalCostYear = cursor.fetchone()
 
     # I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
     months = [None, "January", "February", "March", "April", "May", "June", "July", 
@@ -365,7 +401,7 @@ def customerSpendingUpdate():
         filter_end_date = today_date
     # Setting begin date to default ===== current date - 6 months 
     if filter_begin_date == "": 
-        query = 'select DATE(date_sub(now(), interval 6 month)) as date'
+        query = 'select DATE(date_sub(now(), interval 5 month)) as date'
         cursor.execute(query)
         filter_begin_date = cursor.fetchone()['date']  
 
@@ -398,7 +434,12 @@ def customerSpendingUpdate():
     cursor.execute(pastXmonths, (email, noMonths))
     #pastXMonths should contain the total number of money spent throught the
     #specified period of time, or by default 6 months
-    pastXmonths = float(cursor.fetchone()['pastXmonths'])
+    pastXmonths = cursor.fetchone()['pastXmonths']
+    if pastXmonths:
+        pastXmonths = float(pastXmonths)
+    else:
+        pastXmonths = 0
+    pastXmonthsDisplay = "{:.2f}".format(pastXmonths)
 
 
 
@@ -439,15 +480,45 @@ def customerSpendingUpdate():
     LOOK HERE    {filter_begin_date}
     LOOK HERE 1   {filter_end_date}
     LOOK HERE 2   {noMonths}
-    ddd            {display_months}
-    what is this   {valsOnly}
+    display_months {display_months}
+    valsOnly       {valsOnly}
+    today_date      {today_date}
     
     
     ''')
-    return render_template('customerSpending.html', totalCost=totalCost, display_months=display_months, 
-   percents=percents, pastXmonths=pastXmonths,valsOnly=valsOnly)
+
+    x_unformatted = '-'.join(display_months)
+    y_unformatted = '-'.join(valsOnly)
+    tdyYear,tdyMonth,tdyDay = str(today_date).split('-')
+    lstYear, lstMonth = int(tdyYear) - 1, months[(int(tdyMonth)-1)]
 
 
+    if not totalCostYear['totalCost']:
+        yearCost = '0.00'
+    else:
+        yearCost = totalCostYear['totalCost']
+
+    return render_template('customerSpending.html', totalCostYear=totalCostYear, display_months=display_months, 
+   percents=percents, pastXmonthsDisplay=pastXmonthsDisplay,valsOnly=valsOnly, x_unformatted=x_unformatted, 
+   y_unformatted=y_unformatted,byear=byear,bmonth=months[int(bmonth)], eyear=eyear, emonth=months[int(emonth)], 
+   noMonths=noMonths, tdyYear=tdyYear, tdyMonth=months[int(tdyMonth)], lstYear=lstYear, lstMonth=lstMonth, yearCost=yearCost)
+
+
+
+
+
+
+
+@app.route('/customerSpendingUpdate', methods=['GET', 'POST'])
+def customerSpendingUpdate():
+    # part1 get user inputs
+    try:
+        filter_begin_date = request.form['Start Date']
+        filter_end_date = request.form['End Date']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('customerLogin.html', error=message)
+    return customerSpending(filter_begin_date, filter_end_date)
 
 
 
