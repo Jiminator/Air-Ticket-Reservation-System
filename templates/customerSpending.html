@@ -1,0 +1,277 @@
+1) months
+2) percent
+
+percents.append([val, (val/pastSixMonths) * 100])
+
+
+
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+<B><h2>Total Cost Spent in Past Year: {{yearCost['yearCost']}}   {{pastSixMonths}} </h2>  </B>
+<body>
+    <br>
+    <h3><b>All Your Purchased Flights Since Last Year</b></h3>
+    <!-- <iframe src="http://127.0.0.1:5000/customerSpendingIFRAME" 
+    title="pastFlights" width="700" height="300">
+    </iframe> -->
+
+
+
+
+
+    
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <style type="text/css">
+
+        .graph {
+            margin-bottom:1em;
+        font:normal 100%/150% arial,helvetica,sans-serif;
+        }
+
+        .graph caption {
+            font:bold 150%/120% arial,helvetica,sans-serif;
+            padding-bottom:0.33em;
+        }
+
+        .graph tbody th {
+            text-align:right;
+        }
+
+        @supports (display:grid) {
+
+            @media (min-width:32em) {
+
+                .graph {
+                    display:block;
+                width:700px;
+                height:300px;
+                }
+
+                .graph caption {
+                    display:block;
+                }
+
+                .graph thead {
+                    display:none;
+                }
+
+                .graph tbody {
+                    position:relative;
+                    display:grid;
+                    grid-template-columns:repeat(auto-fit, minmax(2em, 1fr));
+                    column-gap:1.5%;
+                    align-items:end;
+                    height:100%;
+                    margin:5em 0 1em 3em;      /*change this to make the graph move*/
+                    padding:0 1em;
+                    border-bottom:2px solid rgba(0,0,0,0.5);
+                    background:repeating-linear-gradient(
+                        180deg,
+                        rgba(170,170,170,0.7) 0,
+                        rgba(170,170,170,0.7) 1px,
+                        transparent 1px,
+                        transparent 20%
+                    );
+                }
+
+                .graph tbody:before,
+                .graph tbody:after {
+                    position:absolute;
+                    left:-10em;
+                    width:16em;
+                    text-align:right;
+                    font:bold 100%/120% arial,helvetica,sans-serif;
+                }
+
+                .graph tbody:before {
+                    content:"Ammount of Money";
+                    top:11em;
+                    transform:rotate(-90deg);
+                }
+
+                .graph tr {
+                    position:relative;
+                    display:block;
+                }
+
+                .graph tr:hover {
+                    z-index:999;
+                }
+
+                .graph th,
+                .graph td {
+                    display:block;
+                    text-align:center;
+                }
+
+                .graph tbody th {
+                    position:absolute;
+                    top:-3em;
+                    left:0;
+                    width:100%;
+                    font-weight:normal;
+                    text-align:center;
+            white-space:nowrap;
+                    text-indent:0;
+                    transform:rotate(-45deg);
+                }
+
+                .graph tbody th:after {
+                    content:"";
+                }
+
+                .graph td {
+                    width:100%;
+                    height:100%;
+                    background:#F63;
+                    border-radius:0.5em 0.5em 0 0;
+                    transition:background 0.5s;
+                }
+
+                .graph tr:hover td {
+                    opacity:0.7;
+                }
+
+                .graph td span {
+                    overflow:hidden;
+                    position:absolute;
+                    left:50%;
+                    top:50%;
+                    width:0;
+                    padding:0.5em 0;
+                    margin:-1em 0 0;
+                    font:normal 85%/120% arial,helvetica,sans-serif;
+                    font-weight:bold;
+                    opacity:0;
+                    transition:opacity 0.5s;
+            color:white;
+                }
+
+                .toggleGraph:checked + table td span,
+                .graph tr:hover td span {
+                    width:4em;
+                    margin-left:-2em;
+                    opacity:1;
+                }           
+            } 
+        }
+    </style>
+    <table class="graph">
+        
+        <caption>Money spent last 6 months</caption>
+        <thead>
+            <tr>
+                <th scope="col">Month</th>
+                <th scope="col">Cost</th>
+            </tr>
+        </thead><tbody>
+            <tr style="{'height':percents[0][1]}">
+                <th scope="row">{{display_months[0]}}</th>
+                <td><span>{{percents[0][0]}}</span></td>
+            </tr>
+            <tr style="height:23%">
+                <th scope="row">{{display_months[1]}}</th>
+                <td><span>{{percents[1][0]}}</span></td>
+            </tr>
+            <tr style="height:7%">
+                <th scope="row">{{display_months[2]}}</th>
+                <td><span>{{percents[2][0]}}</span></td>
+            </tr>
+            <tr style="height:38%">
+                <th scope="row">{{display_months[3]}}</th>
+                <td><span>{{percents[3][0]}}</span></td>
+            </tr>
+            <tr style="height:35%">
+                <th scope="row">{{display_months[4]}}</th>
+                <td><span>{{percents[4][0]}}</span></td>
+            </tr>
+            <tr style="height:30%">
+                <th scope="row">{{display_months[5]}}</th>
+                <td><span>{{percents[5][0]}}</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br></br>
+    <br> Filter My Tickets: </br>
+    <form action="/customerSpendingUpdate" method="POST">
+        <input type="text" name="departureairport" placeholder="Departure Airport" maxlength="20" /></br>
+        <input type="text" name="arrivalairport" placeholder="Arrival airport" maxlength="20" /></br>
+        <input type="date" name="departdate" /> Departure date</br>
+        <input type="date" name="returndate" /> Return date (For round-trips)</br></br>
+        <!-- the button doesn't work -->
+        <input type="submit" value=Search />
+        {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </form>
+
+    <!-- Will need round trip date search as well... -->
+
+    
+
+    <a href="/customerHome">Go back</a>
+
+</body>
+
+</html>
