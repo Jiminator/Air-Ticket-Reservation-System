@@ -24,18 +24,6 @@ def removeFromDisplay(display, val):
                 flag = False
         if flag:
             newdisplay.append(checkflight)
-
-    print(f'''
-    
-    
-    THIS RAN {newdisplay}
-
-    Purcahses {val}
-
-    display {display}
-    
-    
-    ''')
     return newdisplay
 
 
@@ -174,7 +162,7 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
         seatsTaken = numTickets['seats_taken']
         totalSeats = numTickets['number_of_seats']
         if seatsTaken >= (totalSeats * 0.6):
-            cost = float(cost) * 1.250
+            cost = float(cost) * 1.25
             flight['base_price'] = float(cost)
         if seatsTaken < totalSeats:
             finalDisplay.append(flight)
@@ -187,6 +175,15 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
     # finalDisplay will have all the available flights for purchase that
     # are Not full, Not cancelled, Not previous flight, AND NOT owned!!!
 
+    print(f"""
+    
+    THIS IS base {finalDisplay}
+    
+    
+    
+    """)
+
+
     message = None
     flag = False
     if ticketID and int(ticketID) in validTicketID:
@@ -197,11 +194,21 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
         if checkForRepurchase:
             message = "Error: You have already purchased a ticket for this flight"
         else:
+            popval = None
+            # find the index
+            for i,flight in enumerate(finalDisplay):
+                if int(flight['ticket_ID']) == int(ticketID):
+                    popval = i
             purchase = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
-            cursor.execute(purchase, (ticketID, email, cost, cardType, cardNumber,name, expDate))
+            cursor.execute(purchase, (ticketID, email, finalDisplay[popval]['base_price'], cardType, cardNumber,name, expDate))
             conn.commit()
             message = "Success: this is confirmation of your purchase"
             flag = True
+
+            #need to now update the table
+            if popval is not None:
+                finalDisplay.pop(popval)
+    
     elif ticketID:
         message = "You have already purchased this ticket!"
     
@@ -454,7 +461,6 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         monthYear.append(i)
 
     for i in monthYear:
-        print(i)
         percent = """
         select SUM(sold_price) as price from purchase
         where email=%s
