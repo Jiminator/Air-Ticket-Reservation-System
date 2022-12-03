@@ -149,6 +149,88 @@ def staffViewFlights():
     return render_template('staffViewFlights.html', flights=data)
 
 
+@app.route('/frequentCustomers')
+def frequent_customers():
+    username = session['username']
+    cursor = conn.cursor()
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
+
+    max_ticket_query = '''
+    SELECT MAX(ticket_count) AS max_ticket FROM (
+    SELECT email, COUNT(ticket.ticket_ID) as ticket_count 
+    FROM ticket, purchase WHERE purchase.ticket_ID = ticket.ticket_ID
+    AND purchase_date_time > DATE_SUB(NOW(), INTERVAL 1 YEAR)
+    AND purchase_date_time < NOW()
+    AND ticket.airline_name = %s
+    GROUP BY email) as T;
+    '''
+    cursor.execute(max_ticket_query, (airline['airline_name']))
+    max_data = cursor.fetchone()
+
+    query = '''
+    SELECT email, COUNT(ticket.ticket_ID) as ticket_count 
+    FROM ticket, purchase WHERE purchase.ticket_ID = ticket.ticket_ID 
+    AND purchase_date_time > DATE_SUB(NOW(), INTERVAL 1 YEAR)
+    AND purchase_date_time < NOW()
+    AND ticket.airline_name = %s
+    GROUP BY email HAVING ticket_count = %s
+    '''
+    cursor.execute(query, (airline['airline_name'], max_data['max_ticket']) )
+    data = cursor.fetchall()
+
+    cust_query = '''
+    SELECT DISTINCT name, purchase.email AS email 
+    FROM customer, purchase, ticket 
+    WHERE purchase.ticket_ID = ticket.ticket_ID AND purchase.email = customer.email 
+    AND ticket.airline_name = %s;
+    '''
+    cursor.execute(cust_query, (airline['airline_name']))
+    cust_data = cursor.fetchall()
+    cursor.close()
+    return render_template('frequentCustomers.html', customer=data, allCustomer=cust_data)
+
+
+@app.route('/customerFlights/<email>/')
+def customer_flights(email):
+    username = session['username']
+    cursor = conn.cursor()
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
+
+    key_query = '''
+    SELECT DISTINCT airline_name, flight_number, departure_date_time
+    FROM purchase, ticket WHERE purchase.ticket_ID = ticket.ticket_ID 
+    AND purchase.email = %s AND ticket.airline_name = %s;
+    '''
+    cursor.execute(key_query, (email, airline['airline_name']))
+    key_data = cursor.fetchall()
+    query = '''
+    SELECT DISTINCT flight.airline_name, flight.flight_number, flight.departure_date_time, 
+    flight.arrival_date_time, flight.base_price, flight.flight_status, 
+    flight.departure_airport_name, flight.arrival_airport_name, flight.airplane_ID
+    FROM purchase, ticket, flight 
+    WHERE ticket.airline_name = flight.airline_name AND ticket.flight_number = flight.flight_number 
+    AND ticket.departure_date_time = flight.departure_date_time 
+    AND purchase.ticket_ID = ticket.ticket_ID AND purchase.email = %s
+    AND ticket.airline_name = %s ORDER BY DATE(flight.departure_date_time);
+    '''
+    cursor.execute(query, (email, airline['airline_name']))
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('customerFlights.html', flights=data)
+
+
 # Logout for staff
 @app.route('/staffLogout')
 def logout_staff():

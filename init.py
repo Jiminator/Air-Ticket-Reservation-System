@@ -10,6 +10,8 @@ import staff
 import status
 import airplane
 import airport
+import analytics
+import ratings
 
 
 # Index page
