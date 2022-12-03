@@ -19,10 +19,11 @@
         <p class="error"><strong>Error:</strong> {{error}}</p>
         {% endif %}
     </form>
-    <h2><p style="color: #006587">Displaying payments from <b>{{bmonth}}, {{byear}} to {{emonth}}, {{eyear}}</b> - ({{noMonths}} months)</p></h2>
-    <h3><p style="color: #062380">Total cost from <b>{{bmonth}}, {{byear}} to {{emonth}}, {{eyear}}</b> - ({{noMonths}} months) = <b>${{pastXmonthsDisplay}}</b></p></h3>
-    <h3><p style="color: #a1002b">Total cost from <b>{{lstMonth}}, {{lstYear}} to {{tdyMonth}}, {{tdyYear}}</b> - ({{12}} months) = <b>${{yearCost}}</b></p></h3>
-	<div id='myDiv'>    
+    {% if not error %}
+    <h2><p style="color: #006587">Displaying payments from <b>{{bmonth}}, {{byear}} to {{emonth}}, {{eyear}}</b> - ({{noMonths}} months) = <b>${{rangedTotalCost}}</b></p></h2>
+    <h3><p style="color: #a1002b">Total cost from <b>{{lstMonth}}, {{lstYear}} to {{tdyMonth}}, {{tdyYear}}</b> - (LAST YEAR) = <b>${{defaultYearCost}}</b></p></h3>
+	<div id='myDiv'>   
+    {% endif %} 
     <script type="text/javascript">
         x_unformatted = "{{x_unformatted}}";
         y_unformatted = "{{y_unformatted}}"

@@ -1,7 +1,16 @@
 from app import *
 from datetime import datetime, date
 
-
+def validDates(d1,d2):
+    if d1 == '' or d2 =='':
+        return True
+    start = [int(i) for i in d1.split('-')]
+    end = [int(i) for i in d2.split('-')]
+    print(start)
+    print(end)
+    d1 = datetime(start[0], start[1], start[2])
+    d2 = datetime(end[0], end[1], end[2])
+    return d2 > d1
 
 def yearmonthday(date):
     return str(date).split('-')
@@ -25,7 +34,6 @@ def removeFromDisplay(display, val):
         if flag:
             newdisplay.append(checkflight)
     return newdisplay
-
 
 
 # Home page for customer
@@ -60,10 +68,11 @@ def customerviewflights():
         return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
     display = """
-    SELECT DISTINCT *   
-    FROM purchase natural join ticket natural join flight
-    WHERE email=%s 
-    AND departure_date_time > NOW();
+        SELECT DISTINCT *   
+        FROM purchase natural join ticket natural join flight
+        WHERE email=%s 
+        AND departure_date_time > NOW()
+        ORDER BY `ticket`.`departure_date_time` ASC
     """
     cursor.execute(display, (email))
     flightdata = cursor.fetchall()
@@ -175,15 +184,6 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
     # finalDisplay will have all the available flights for purchase that
     # are Not full, Not cancelled, Not previous flight, AND NOT owned!!!
 
-    print(f"""
-    
-    THIS IS base {finalDisplay}
-    
-    
-    
-    """)
-
-
     message = None
     flag = False
     if ticketID and int(ticketID) in validTicketID:
@@ -192,7 +192,7 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
         checkForRepurchase = cursor.fetchone()
         #checks for repurchase error
         if checkForRepurchase:
-            message = "Error: You have already purchased a ticket for this flight"
+            message = "Error: You have already purchased this Ticket!"
         else:
             popval = None
             # find the index
@@ -210,10 +210,13 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
                 finalDisplay.pop(popval)
     
     elif ticketID:
-        message = "You have already purchased this ticket!"
+        message = "Ticket for this flight is not unavailable for purchase"
     
     cursor.close()
-    return render_template('customerPurchase.html', flights=finalDisplay, error=message, flag=flag)
+
+    today = date.today()
+    today = today.strftime("%b-%d-%Y")
+    return render_template('customerPurchase.html', flights=finalDisplay, error=message, flag=flag, today=today)
 
 @app.route('/customerPurchaseUpdate', methods=['GET', 'POST'])
 def customerPurchaseUpdate():
@@ -367,32 +370,46 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         message = 'Please Login or Create an Account'
         return render_template('customerLogin.html', error=message)
 
+    if not validDates(filter_begin_date, filter_end_date):
+        message = "Cmon... the End date can't be before the start date..."
+        return render_template('customerSpending.html', error=message)
     cursor = conn.cursor()
 
-    variables = [email]
 
-    # part2 get the total cost
-    totalCostYear = """
+    # the default is to show the cost of 1 year
+    defaultYearCost = """
+        SELECT SUM(sold_price) as totalCost  
+        FROM purchase natural join ticket natural join flight
+        WHERE email=%s
+        AND purchase_date_time>=date_sub(now(), interval 1 year);
+    """
+    cursor.execute(defaultYearCost, (email))
+    defaultYearCost = cursor.fetchone()['totalCost']
+
+
+    variables = [email]
+    rangedTotalCost = """
     SELECT SUM(sold_price) as totalCost  
     FROM purchase natural join ticket natural join flight
     WHERE email=%s
     """
 
     # make query more specific if the user gives us the dates
-    if '' in [filter_begin_date, filter_end_date]:
+    if filter_begin_date != '' or filter_end_date != '':
         if filter_begin_date != '':
-            totalCostYear += ' AND purchase_date_time>=%s'
+            rangedTotalCost += ' AND purchase_date_time>=%s'
             variables.append(filter_begin_date)
         if filter_end_date != '':
-            totalCostYear += ' AND purchase_date_time<=%s'
+            rangedTotalCost += ' AND purchase_date_time<=%s'
             variables.append(filter_end_date)
     else:
-        # if doesn't input anything then default to 1 year.
-        totalCostYear += ' AND purchase_date_time>=date_sub(now(), interval 1 year) '
+        # I included the current month so I only subtract by 5.
+        rangedTotalCost += ' AND purchase_date_time>=date_sub(now(), interval 5 month) '
+    cursor.execute(rangedTotalCost, tuple(variables))
+    rangedTotalCost = cursor.fetchone()['totalCost']
 
-    cursor.execute(totalCostYear, tuple(variables))
-    totalCostYear = cursor.fetchone()
 
+    print(rangedTotalCost)
     # I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
     months = [None, "January", "February", "March", "April", "May", "June", "July", 
             "August", "September", "October", "November", "December"]
@@ -400,12 +417,11 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
 
                                 
 
-    query = 'select DATE(NOW()) as date'
-    cursor.execute(query)
-    today_date = cursor.fetchone()['date'] 
+    today = date.today()
+    today = today.strftime("%b-%d-%Y")
     # Setting start date to default ===== current date 
     if filter_end_date == '':
-        filter_end_date = today_date
+        filter_end_date = date.today()
     # Setting begin date to default ===== current date - 6 months 
     if filter_begin_date == "": 
         query = 'select DATE(date_sub(now(), interval 5 month)) as date'
@@ -418,6 +434,7 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
     byear,bmonth,bday = yearmonthday(filter_begin_date)
     eyear,emonth,eday = yearmonthday(filter_end_date)
 
+    #formats the year and month for me
     display_months = []
     tyear,tmonth,tday = int(eyear),int(emonth),int(eday)
     for i in range(noMonths):
@@ -433,31 +450,26 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
     # display_months looks like ['December 2022', 'November 2022', 'October 2022', 'September 2022', 'August 2022', 'July 2022', 'June 2022', 'May 2022', 'April 2022', 'March 2022', 'February 2022', 'January 2022']        
     # this will be the x axis
     
-    pastXmonths = """
-    select SUM(sold_price) as pastXmonths from purchase
-    where email=%s
-    AND purchase_date_time>=date_sub(now(), interval %s month)
-    """
-    cursor.execute(pastXmonths, (email, noMonths))
-    #pastXMonths should contain the total number of money spent throught the
-    #specified period of time, or by default 6 months
-    pastXmonths = cursor.fetchone()['pastXmonths']
-    if pastXmonths:
-        pastXmonths = float(pastXmonths)
+
+
+    # get the total cost of between the range
+    if rangedTotalCost:
+        rangedTotalCost = float(rangedTotalCost)
     else:
-        pastXmonths = 0
-    pastXmonthsDisplay = "{:.2f}".format(pastXmonths)
+        rangedTotalCost = 0
+    rangedTotalCost = "{:.2f}".format(rangedTotalCost)
+
 
 
 
     #CALCULATING THE PERCENTS
 
-    monthYear = []
-    percents = []
-    valsOnly=[]
+    monthYear = []  # this will hold the X-Axis Values
+    percents = []   # this will hold the Bar graph hieghts
+    valsOnly=[]     # this will hold the Y-Axis Values  
     for i in display_months:
         i = i.split()
-        i.append(months.index(i[0]))
+        i.append(months.index(i[0])) # trying to get the numeric value for the month
         monthYear.append(i)
 
     for i in monthYear:
@@ -471,46 +483,33 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         val = cursor.fetchone()['price']
         if val:
             val = float(val)
-            percents.append(["{:.2f}".format(val), "{:.2f}".format((val/pastXmonths) * 100)])
+            percents.append(["{:.2f}".format(val), "{:.2f}".format((val/float(rangedTotalCost)) * 100)])
             valsOnly.append("{:.2f}".format(val))
         else:
             percents.append([0, 1])
             valsOnly.append("{:.2f}".format(0))
 
-        #percents is formatted so that percents[0] is the $$ and percents[1] is the %%
-
-
-    print(f'''
-    
-    
-    LOOK HERE    {filter_begin_date}
-    LOOK HERE 1   {filter_end_date}
-    LOOK HERE 2   {noMonths}
-    display_months {display_months}
-    valsOnly       {valsOnly}
-    today_date      {today_date}
-    
-    
-    ''')
+        #percents is formatted so that percents[0] is the $$ and percents[1] is the Hieght
 
     x_unformatted = '-'.join(display_months)
     y_unformatted = '-'.join(valsOnly)
-    tdyYear,tdyMonth,tdyDay = str(today_date).split('-')
+
+
+
+    today = date.today()
+    today = today.strftime("%d/%m/%Y")
+    tdyDay, tdyMonth, tdyYear = str(today).split('/')
+
     lstYear, lstMonth = int(tdyYear) - 1, months[(int(tdyMonth)-1)]
 
-
-    if not totalCostYear['totalCost']:
-        yearCost = '0.00'
-    else:
-        yearCost = totalCostYear['totalCost']
-
-    return render_template('customerSpending.html', totalCostYear=totalCostYear, display_months=display_months, 
-   percents=percents, pastXmonthsDisplay=pastXmonthsDisplay,valsOnly=valsOnly, x_unformatted=x_unformatted, 
-   y_unformatted=y_unformatted,byear=byear,bmonth=months[int(bmonth)], eyear=eyear, emonth=months[int(emonth)], 
-   noMonths=noMonths, tdyYear=tdyYear, tdyMonth=months[int(tdyMonth)], lstYear=lstYear, lstMonth=lstMonth, yearCost=yearCost)
+    return render_template('customerSpending.html', x_unformatted=x_unformatted, 
+   y_unformatted=y_unformatted, byear=byear,bmonth=months[int(bmonth)], eyear=eyear, emonth=months[int(emonth)], noMonths=noMonths,
+   tdyYear=tdyYear, tdyMonth=months[int(tdyMonth)], lstYear=lstYear, lstMonth=lstMonth, defaultYearCost=defaultYearCost, rangedTotalCost=rangedTotalCost)
 
 
-
+# totalCostYear=totalCostYear, display_months=display_months, 
+# percents=percents, pastXmonthsDisplay=pastXmonthsDisplay,valsOnly=valsOnly, 
+   
 
 
 
