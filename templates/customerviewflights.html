@@ -5,17 +5,20 @@
     </h1>
 </head>
 <body>
-    <b><h3>Welcome, {{customer['name']}} </h3></br></b>
-    <a href="/customerviewflights">My flights</a>
-    <br></br>
-    <a href="/customerPurchase">Purchase a ticket</a>
-    <br></br>
-    <a href="/customerDelete">Cancel a Ticket</a>
-    </br></br>
-    <a href="/customerRateflight">Rate a flight</a>
-    <br></br>
-    <a href="/customerSpending">Track my spending</a></br></br>
+    Filter My Tickets: </br>
+    <form action="/customerviewflightsUpdate" method="POST">
+        <input type="text" name="departureairport" placeholder="Departure Airport" maxlength="20" /></br>
+        <input type="text" name="arrivalairport" placeholder="Arrival airport" maxlength="20" /></br>
+        <input type="date" name="departdate" /> Departure date</br>
+        <input type="date" name="returndate" /> Return date (For round-trips)</br></br>
+        <!-- the button doesn't work -->
+        <input type="submit" value=Search />
+        {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </form>
 
+    <!-- Will need round trip date search as well... -->
 
     <style type="text/css">
         table, th, td {
@@ -25,7 +28,6 @@
         }
     </style>
 
-    <b>My upcoming flights:</b>
     <table>
         <th>Airline</th>
         <th>Flight Number</th>
@@ -52,7 +54,7 @@
         {% endfor %}
     </table></br>
 
-    <a href="/customerLogout">Logout</a>
+    <a href="/customerHome">Go back</a>
 
 </body>
 
