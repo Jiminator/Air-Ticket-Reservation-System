@@ -4,7 +4,11 @@ from app import *
 # Home page for staff
 @app.route('/staffHome')
 def staff_home():
-    username = session['username']
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     query = 'SELECT * FROM airlinestaff WHERE username = %s'
     cursor.execute(query, username)
@@ -60,6 +64,11 @@ def staff_home():
 # Define route for passenger list
 @app.route('/passengerList/<airline_name>/<flight_number>/<departure_date_time>/')
 def passenger_list(airline_name, flight_number, departure_date_time):
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     query = '''
     SELECT name, phone_number, passport_number, passport_expiration
@@ -75,6 +84,11 @@ def passenger_list(airline_name, flight_number, departure_date_time):
 
 @app.route('/sourceSearch', methods=['GET', 'POST'])
 def sourceSearch():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     airport = request.form['sourceairport']
     username = session['username']
     cursor = conn.cursor()
@@ -94,6 +108,11 @@ def sourceSearch():
 
 @app.route('/destSearch', methods=['GET', 'POST'])
 def destSearch():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     airport = request.form['destairport']
     username = session['username']
     cursor = conn.cursor()
@@ -113,6 +132,11 @@ def destSearch():
 
 @app.route('/dateSearch', methods=['GET', 'POST'])
 def dateSearch():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     startdate = request.form['startdate']
     enddate = request.form['enddate']
 
@@ -137,6 +161,16 @@ def dateSearch():
 
 @app.route('/staffViewFlights')
 def staffViewFlights():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     query = '''
     SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
@@ -151,7 +185,11 @@ def staffViewFlights():
 
 @app.route('/frequentCustomers')
 def frequent_customers():
-    username = session['username']
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     airline_query = '''
     SELECT airline_name
@@ -198,7 +236,11 @@ def frequent_customers():
 
 @app.route('/customerFlights/<email>/')
 def customer_flights(email):
-    username = session['username']
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     airline_query = '''
     SELECT airline_name

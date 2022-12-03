@@ -4,7 +4,6 @@ from app import *
 # Define route for viewing flights
 @app.route('/viewFlights')
 def view_flights():
-
     cursor = conn.cursor()
     display = """
         SELECT DISTINCT *   
@@ -55,9 +54,9 @@ def flight_search():
         cursor.execute(filter)
     display = cursor.fetchall()
 
-
     cursor.close()
     return render_template('viewFlights.html', flights=display)
+
 
 @app.route('/addFlight')
 def add_flight():
@@ -75,7 +74,7 @@ def add_flight():
 
     #executes query
     query = '''
-    SELECT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
+    SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
     FROM airlineStaff, flight 
     WHERE airlineStaff.airline_name = flight.airline_name AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0
     '''

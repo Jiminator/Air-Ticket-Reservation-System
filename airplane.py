@@ -3,12 +3,21 @@ from app import *
 
 @app.route('/addPlane')
 def add_plane():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     return render_template('addPlane.html')
 
 
 @app.route('/addPlaneResult', methods=['GET', 'POST'])
 def add_plane_result():
-    username = session['username']
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     airplaneID = request.form['airplaneID']
     seat = request.form['seat']
     manufacturer = request.form['manufacturer']
@@ -39,6 +48,11 @@ def add_plane_result():
 
 @app.route('/addPlaneConfirm/<airlinename>/<airplaneID>/')
 def add_plane_confirm(airlinename, airplaneID):
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     query = '''
     SELECT *

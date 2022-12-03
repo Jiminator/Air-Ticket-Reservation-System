@@ -4,12 +4,22 @@ from app import *
 # Define route for adding new airport
 @app.route('/addAirport')
 def add_airport():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     return render_template('addAirport.html')
 
 
 # Define route for adding new airport form
 @app.route('/addAirportResult', methods=['GET', 'POST'])
 def add_airport_result():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     airport = request.form['airport_name']
     city = request.form['city']
     country = request.form['country']

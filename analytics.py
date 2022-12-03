@@ -2,8 +2,12 @@ from app import *
 
 
 @app.route('/viewReports')
-def view_feports():
-	username = session['username']
+def view_reports():
+	try:
+		username = session['username']
+	except Exception:
+		message = 'Please Login or Create an Account'
+		return render_template('staffLogin.html', error=message)
 	cursor = conn.cursor()
 	airline_query = '''
 	SELECT airline_name
@@ -38,7 +42,11 @@ def view_feports():
 
 @app.route('/viewReportDate', methods=['GET', 'POST'])
 def view_report_date():
-	username = session['username']
+	try:
+		username = session['username']
+	except Exception:
+		message = 'Please Login or Create an Account'
+		return render_template('staffLogin.html', error=message)
 	startdate = request.form['startdate']
 	enddate = request.form['enddate']
 	cursor = conn.cursor()
@@ -65,12 +73,21 @@ def view_report_date():
 
 @app.route('/dateChart')
 def date_chart():
+	try:
+		username = session['username']
+	except Exception:
+		message = 'Please Login or Create an Account'
+		return render_template('staffLogin.html', error=message)
 	return render_template('dateChart.html')
 
 
 @app.route('/compareRevenue')
 def compare_revenue():
-	username = session['username']
+	try:
+		username = session['username']
+	except Exception:
+		message = 'Please Login or Create an Account'
+		return render_template('staffLogin.html', error=message)
 	cursor = conn.cursor()
 	airline_query = '''
 	SELECT airline_name

@@ -3,7 +3,11 @@ from app import *
 
 @app.route('/flightRatings')
 def flight_ratings():
-    username = session['username']
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     airline_query = '''
     SELECT airline_name
@@ -25,6 +29,11 @@ def flight_ratings():
 
 @app.route('/allFlightRatings<airlinename>/<flightnum>/<depdatetime>/')
 def all_flight_ratings(airlinename, flightnum, depdatetime):
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     query = '''
     SELECT email, comment, rating

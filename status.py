@@ -3,12 +3,21 @@ from app import *
 
 @app.route('/flightStatus')
 def flight_status():
+	try:
+		username = session['username']
+	except Exception:
+		message = 'Please Login or Create an Account'
+		return render_template('staffLogin.html', error=message)
 	return render_template('flightStatus.html')
 
 
 @app.route('/flightStatusResult', methods=['GET', 'POST'])
 def flight_status_result():
-	username = session['username']
+	try:
+		username = session['username']
+	except Exception:
+		message = 'Please Login or Create an Account'
+		return render_template('staffLogin.html', error=message)
 	flightnum = request.form['flight_number']
 	depdatetime = request.form['departure_date_time']
 	status = request.form['status']
