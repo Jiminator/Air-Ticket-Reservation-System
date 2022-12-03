@@ -11,8 +11,11 @@
         <input type="text" name="email" placeholder="email" required /> </br>
         <input type="password" name="password" placeholder="password" required /></br>
         <input type="submit" value=Login />
-        {% if error %}
-        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% if error and not flag %}
+            <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+        {% if error and flag %}
+            <p class="error"><strong>Success:</strong> {{error}}</p>
         {% endif %}
     </form>
 

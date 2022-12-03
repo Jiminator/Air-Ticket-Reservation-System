@@ -58,11 +58,8 @@
         <input type="date" name="expiration start" value="expiration date" min="2022-12-15" max="2030-12-31">
         <br><br>
         <br><input type="submit" value=submit />
-        {% if error and not flag%}
+        {% if error%}
             <p class="error"><strong>Error:</strong> {{error}}</p>
-        {% endif %}
-        {% if error and flag%}
-            <p class="error"><strong>Success:</strong> {{error}}</p>
         {% endif %}
     </form>
     
