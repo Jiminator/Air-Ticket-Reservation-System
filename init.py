@@ -8,6 +8,8 @@ import flight
 import register
 import staff
 import status
+import airplane
+import airport
 
 
 # Index page

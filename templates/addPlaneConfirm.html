@@ -1,0 +1,46 @@
+<html>
+<head>
+    <h1>
+        NYU Tandon Airline Database System
+    </h1>
+</head>
+
+    <h2>
+        Airplane {{airplaneID}} successfully added!
+    </h2>
+
+<body>
+
+    <style type="text/css">
+        table, th, td {
+            border: 1px solid black;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+    </style>
+
+    <table>
+        <th>Airline</th>
+        <th>Airplane ID</th>
+        <th>Number of Seats</th>
+        <th>Manufacturer</th>
+        <th>Age</th>
+
+
+        {% for line in plane %}
+        <tr>
+            <td>{{line['airline_name']}}</td>
+            <td>{{line['airplane_ID']}}</td>
+            <td>{{line['number_of_seats']}}</td>
+            <td>{{line['manufacturer']}}</td>
+            <td>{{line['age']}}</td>
+        </tr>
+        {% endfor %}
+
+    </table></br>
+
+    <a href="/staffHome">Go back</a>
+
+</body>
+
+</html>
