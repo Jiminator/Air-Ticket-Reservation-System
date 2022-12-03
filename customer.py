@@ -105,13 +105,12 @@ def customerviewflightsUpdate():
         filter += ' AND arrival_airport_name=%s'
         variables.append(arrivPort)
     if departdate:
-        filter += ' AND departure_date_time > %s'
+        filter += ' AND departure_date_time >= %s'
         variables.append(departdate)
     if returndate:
-        filter += ' AND arrival_date_time < %s'
+        filter += ' AND arrival_date_time <= %s'
         variables.append(returndate)
-
-    # filtering by date is UNTESTED!!!
+    filter += ' ORDER BY `ticket`.`departure_date_time` ASC;'
     cursor.execute(filter, tuple(variables))
     display = cursor.fetchall()
 
