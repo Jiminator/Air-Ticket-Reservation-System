@@ -122,8 +122,9 @@ def customerviewflightsUpdate():
 @app.route('/customerLogout')
 def logoutCustomer():
     session.pop('email')
+    flag = True
     message = 'You have Successfully Logged Out'
-    return render_template('customerLogin.html', error=message)
+    return render_template('customerLogin.html', error=message, flag=flag)
 
 @app.route('/customerPurchase', methods=['GET', 'POST'])
 def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',expDate =''):

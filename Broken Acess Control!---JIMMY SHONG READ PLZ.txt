@@ -1,0 +1,63 @@
+MAJOR ISSUES:
+	NO access control on any on the pages... customers can access all the staff
+	pages and do things without loggin it !!!
+
+	
+
+
+EACH PAGE::::
+
+Viewflights
+	- Filtering by Source and Dest
+		For my implementations, I made it a range but currently you are only
+		allowing only one source and one destination.
+	- the search by source gives you everything. Not sure if that is intended.
+	- base price is incorrect
+
+
+Addflight:
+	- I dont think the query you wrote works. There are repeated flights
+	- can add flights with airplane that is already departed and hasn't landed yet
+		- I think it is because you are only checking for flightnum and not time
+
+Updateflight status:
+	- The error message is wrong if the user enters incorrect depart date
+
+addPlane:
+	- anyone can view the page
+	- incorrect display message for wrong inputs
+	- the plane ID will not be exact for large numbers.
+!!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
+	(ENSURE THAT THE INPUT VALUES ARE WITHIN THE CORRECT BOUNDS FOR THE DATABASE COLUMNS)
+!!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+addAirport:
+	- access control! I can add an airport as a customer
+	- key error
+
+Viewflights:
+	Broken Acess Control: staff from UA are able to see Jetblue flights....
+
+
+frequent customers:
+	Broken Acess Control: anyone can view the user profile.
+	UA staff are able to view Jetblue customers!!!!
+
+viewReports:
+	I dont think the graph is correct
+	Month sales and year sales dont match up
+
+CompareRevenue:
+	I think the query is wrong for this.
+	I got month revenue = 130 but a year revenue of None.
+	
+
+
+
+
+
+	
