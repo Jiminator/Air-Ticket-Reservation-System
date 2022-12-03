@@ -15,7 +15,7 @@ def view_flights():
     cursor.execute(display)
     flightdata = cursor.fetchall()
     cursor.close()
-    return render_template('viewFlights.html', flights=data)
+    return render_template('viewFlights.html', flights=flightdata)
 
 
     
@@ -57,7 +57,7 @@ def flight_search():
 
 
     cursor.close()
-    return render_template('viewFlights.html', flights=data)
+    return render_template('viewFlights.html', flights=display)
 
 @app.route('/addFlight')
 def add_flight():
