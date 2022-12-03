@@ -1,0 +1,65 @@
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+<body>
+
+    <style type="text/css">
+        table, th, td {
+            border: 1px solid black;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+    </style>
+
+    Your Past Flights:
+    <table>
+        <th>Base Price</th>
+        <th>Airline</th>
+        <th>Flight No.</th>
+        <th>Departure Date & Time</th>
+        <th>Arrival Date & Time</th>
+        <th>Departure Airport</th>
+        <th>Arrival Airport</th>
+
+        {% for line in flights %}
+        <tr>
+            <td>${{line['base_price']}}</td>
+            <td>{{line['airline_name']}}</td>
+            <td>{{line['flight_number']}}</td>
+            <td>{{line['departure_date_time']}}</td>
+            <td>{{line['arrival_date_time']}}</td>
+            <td>{{line['departure_airport_name']}}</td>
+            <td>{{line['arrival_airport_name']}}</td>
+        </tr>
+
+        {% endfor %}
+    </table></br>
+
+    <form action="/customerRateflightUpdate" method="POST">
+    <fieldset>
+        <legend><b>Rate Your Previous Flight</b></legend>
+        <b>Which Flight Do You Want to Review:</br></b>
+        <input type="text" name="flightNo" placeholder="Enter the flight number" maxlength="225" required /></br>
+        <b>Flight Information:</br></b>
+        <textarea placeholder="Write Your Review Here" rows = "5" cols = "60" name = "review" maxlength="255" required></textarea><br>
+        <b>Rate your flight experience (1 to 10)</br></b>
+        <input type="number" id="rating" name="Rating" min="1" max="10" required>
+        <br></br>
+        <form action="/customerPurchase" class="inline">
+            <button class="submit-button" >Submit</button>
+        </form>
+        {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </fieldset>
+
+    </form>
+
+    <a href="/customerHome">Go back</a>
+
+</body>
+
+</html>
