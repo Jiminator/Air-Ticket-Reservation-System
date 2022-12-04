@@ -9,16 +9,16 @@ MAJOR ISSUES:
 EACH PAGE::::
 
 Viewflights (Done)
-	- Filtering by Source and Dest
+	- Filtering by Source and Dest (DOne)
 		For my implementations, I made it a range but currently you are only
-		allowing only one source and one destination.
-	- the search by source gives you everything. Not sure if that is intended.
+		allowing only one source and one destination. (Done)
+	- the search by source gives you everything. Not sure if that is intended. (Dome)
 	- base price is incorrect (False)
 
 
 Addflight:
 	- I dont think the query you wrote works. There are repeated flights (Done)
-	- can add flights with airplane that is already departed and hasn't landed yet
+	- can add flights with airplane that is already departed and hasn't landed yet (Done)
 		- I think it is because you are only checking for flightnum and not time
 
 Updateflight status:
@@ -49,8 +49,8 @@ frequent customers:
 	UA staff are able to view Jetblue customers!!!! (Done)
 
 viewReports:
-	I dont think the graph is correct
-	Month sales and year sales dont match up
+	I dont think the graph is correct (Done)
+	Month sales and year sales dont match up (Done)
 
 CompareRevenue:
 	I think the query is wrong for this.
@@ -58,6 +58,11 @@ CompareRevenue:
 	
 Ask about what the correct values for w total amount of revenue earned from ticket sales in the last month and
 last year
+
+add distinct to all queries
+
+add city search for staff
+
 
 
 

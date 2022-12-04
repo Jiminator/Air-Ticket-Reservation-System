@@ -1,5 +1,5 @@
 from app import *
-
+from datetime import datetime, date
 
 # Define route for viewing flights
 @app.route('/viewFlights')
@@ -140,7 +140,20 @@ def add_flight_result():
         error = 'Flight already exists'
         return render_template('addFlight.html', error=error)
     else:
-
+        airplaneID_query = '''
+        SELECT departure_date_time, arrival_date_time
+        FROM flight
+        WHERE airplane_ID = %s
+        '''
+        cursor.execute(airplaneID_query, (airplaneID))
+        impossible_dates = cursor.fetchall()
+        f = '%Y-%m-%d %H:%M:%S'
+        stripped = depdatetime.strip()
+        departure_date_time = datetime.strptime(stripped, f)
+        for date in impossible_dates:
+            if date['departure_date_time'] <= departure_date_time <= date['arrival_date_time']:
+                error = 'Plane is in the air at that time.'
+                return render_template('addFlight.html', error=error)
         ins = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
         cursor.execute(ins, (
         airline['airline_name'], flightnum, depdatetime, arrdatetime, price, status, depairp, arrairp,
