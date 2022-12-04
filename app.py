@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 
+
 # Initialize the app from Flask
 app = Flask(__name__)
 
@@ -21,3 +22,6 @@ conn = pymysql.connect(host="localhost",
                        db='air_ticket_reservation_system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
+
+
+

@@ -25,8 +25,8 @@ def add_airport_result():
     country = request.form['country']
     type = request.form['type']
     cursor = conn.cursor()
-    query = 'SELECT * FROM airport WHERE airport_name = %s AND city = %s'
-    cursor.execute(query, (airport, city))
+    query = 'SELECT * FROM airport WHERE airport_name = %s'
+    cursor.execute(query, (airport))
     data = cursor.fetchone()
 
     error = None

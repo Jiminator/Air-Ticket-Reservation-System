@@ -16,12 +16,15 @@ def view_flights():
     cursor.close()
     return render_template('viewFlights.html', flights=flightdata)
 
-
     
 # Search flights
 @app.route('/flightSearch', methods=['GET', 'POST'])
 def flight_search():
-
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     departPort = request.form['departureairport']
     arrivPort = request.form["arrivalairport"]
@@ -29,7 +32,7 @@ def flight_search():
     returndate = request.form["returndate"]
 
     filter = """
-        SELECT DISTINCT *   
+        SELECT DISTINCT *
         FROM flight
         WHERE departure_date_time > NOW()
     """
@@ -47,7 +50,7 @@ def flight_search():
         filter += ' AND arrival_date_time <= %s'
         variables.append(returndate)
     filter += ' ORDER BY departure_date_time ASC;'
-    
+
     if len(variables):
         cursor.execute(filter, tuple(variables))
     else:
@@ -61,7 +64,11 @@ def flight_search():
 @app.route('/addFlight')
 def add_flight():
     #cursor used to send queries
-    username = session['username']
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
 
     airline_query = '''
@@ -76,9 +83,9 @@ def add_flight():
     query = '''
     SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
     FROM airlineStaff, flight 
-    WHERE airlineStaff.airline_name = flight.airline_name AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0
+    WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0
     '''
-    cursor.execute(query)
+    cursor.execute(query, airline['airline_name'])
     data = cursor.fetchall()
     airp_query = '''
     SELECT airport_name
@@ -99,6 +106,11 @@ def add_flight():
 
 @app.route('/addFlightResult', methods=['GET', 'POST'])
 def add_flight_result():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     flightnum = request.form['flight_number']
     depdatetime = request.form['departure_date_time']
     arrdatetime = request.form['arrival_date_time']
@@ -117,7 +129,7 @@ def add_flight_result():
     cursor.execute(airline_query, (username))
     airline = cursor.fetchone()
 
-    query = 'SELECT * FROM flight WHERE airline_name = %s AND flight_number = %s AND departure_date_time = %s'
+    query = 'SELECT DISTINCT * FROM flight WHERE airline_name = %s AND flight_number = %s AND departure_date_time = %s'
     cursor.execute(query, (airline['airline_name'], flightnum, depdatetime))
     data = cursor.fetchone()
 
@@ -128,6 +140,7 @@ def add_flight_result():
         error = 'Flight already exists'
         return render_template('addFlight.html', error=error)
     else:
+
         ins = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
         cursor.execute(ins, (
         airline['airline_name'], flightnum, depdatetime, arrdatetime, price, status, depairp, arrairp,

@@ -35,6 +35,16 @@ def all_flight_ratings(airlinename, flightnum, depdatetime):
         message = 'Please Login or Create an Account'
         return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
+    if airline['airline_name'] != airlinename:
+        message = 'You are not logged in to ' + airlinename
+        return render_template('staffLogin.html', error=message)
     query = '''
     SELECT email, comment, rating
     FROM interact

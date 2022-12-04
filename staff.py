@@ -70,6 +70,16 @@ def passenger_list(airline_name, flight_number, departure_date_time):
         message = 'Please Login or Create an Account'
         return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
+    if airline['airline_name'] != airline_name:
+        message = 'You are not logged in to ' + airline_name
+        return render_template('staffLogin.html', error=message)
     query = '''
     SELECT name, phone_number, passport_number, passport_expiration
     FROM customer, purchase, ticket 
@@ -82,14 +92,15 @@ def passenger_list(airline_name, flight_number, departure_date_time):
     return render_template('passengerList.html', passenger=data)
 
 
-@app.route('/sourceSearch', methods=['GET', 'POST'])
-def sourceSearch():
+@app.route('/bothSearch', methods=['GET', 'POST'])
+def bothSearch():
     try:
         username = session['username']
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('staffLogin.html', error=message)
-    airport = request.form['sourceairport']
+    source_airport = request.form['sourceairport']
+    dest_airport = request.form['destairport']
     username = session['username']
     cursor = conn.cursor()
     airline_query = '''
@@ -99,35 +110,28 @@ def sourceSearch():
     '''
     cursor.execute(airline_query, (username))
     airline = cursor.fetchone()
-    query = 'SELECT DISTINCT * FROM flight WHERE departure_airport_name = %s AND airline_name = %s'
-    cursor.execute(query, (airport, airline['airline_name']))
+    print("source_airport: ", source_airport)
+    print("dest_airport: ", dest_airport)
+    if not source_airport and not dest_airport:
+        query = '''
+        SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
+        FROM airlineStaff, flight 
+        WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
+        '''
+        cursor.execute(query, (airline['airline_name']))
+    elif not source_airport:
+        query = 'SELECT * FROM flight WHERE arrival_airport_name = %s AND airline_name = %s'
+        cursor.execute(query, (dest_airport, airline['airline_name']))
+    elif not dest_airport:
+        query = 'SELECT DISTINCT * FROM flight WHERE departure_airport_name = %s AND airline_name = %s'
+        cursor.execute(query, (source_airport, airline['airline_name']))
+    else:
+        query = 'SELECT * FROM flight WHERE (departure_airport_name = %s AND arrival_airport_name = %s) AND airline_name = %s'
+        cursor.execute(query, (source_airport, dest_airport, airline['airline_name']))
     data = cursor.fetchall()
     cursor.close()
     return render_template('staffViewFlights.html', flights=data)
 
-
-@app.route('/destSearch', methods=['GET', 'POST'])
-def destSearch():
-    try:
-        username = session['username']
-    except Exception:
-        message = 'Please Login or Create an Account'
-        return render_template('staffLogin.html', error=message)
-    airport = request.form['destairport']
-    username = session['username']
-    cursor = conn.cursor()
-    airline_query = '''
-    SELECT airline_name
-    FROM airlineStaff 
-    WHERE username = %s
-    '''
-    cursor.execute(airline_query, (username))
-    airline = cursor.fetchone()
-    query = 'SELECT * FROM flight WHERE arrival_airport_name = %s AND airline_name = %s'
-    cursor.execute(query, (airport, airline['airline_name']))
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template('staffViewFlights.html', flights=data)
 
 
 @app.route('/dateSearch', methods=['GET', 'POST'])
@@ -166,18 +170,20 @@ def staffViewFlights():
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('staffLogin.html', error=message)
-    try:
-        username = session['username']
-    except Exception:
-        message = 'Please Login or Create an Account'
-        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
+    airline_query = '''
+        SELECT airline_name
+        FROM airlineStaff 
+        WHERE username = %s
+        '''
+    cursor.execute(airline_query, (username))
+    airline = cursor.fetchone()
     query = '''
     SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
     FROM airlineStaff, flight 
-    WHERE airlineStaff.airline_name = flight.airline_name AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
+    WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
     '''
-    cursor.execute(query)
+    cursor.execute(query, (airline['airline_name']))
     data = cursor.fetchall()
     cursor.close()
     return render_template('staffViewFlights.html', flights=data)

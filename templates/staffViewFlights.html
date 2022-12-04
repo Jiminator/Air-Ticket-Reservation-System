@@ -6,18 +6,10 @@
 </head>
 <body>
 
-    Search by source </br>
-    <form action="/sourceSearch" method="POST">
-        <input type="text" name="sourceairport" maxlength="20" required /></br>
-        <input type="submit" value=Search />
-        {% if error %}
-        <p class="error"><strong>Error:</strong> {{error}}</p>
-        {% endif %}
-    </form>
-
-    Search by destination </br>
-    <form action="/destSearch" method="POST">
-        <input type="text" name="destairport" maxlength="20" required /></br>
+    Search by both source and/or destination </br>
+    <form action="/bothSearch" method="POST">
+        <input type="text" name="sourceairport" maxlength="20"/></br>
+        <input type="text" name="destairport" maxlength="20"/></br>
         <input type="submit" value=Search />
         {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>

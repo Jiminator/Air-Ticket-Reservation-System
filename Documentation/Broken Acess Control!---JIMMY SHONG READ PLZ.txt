@@ -1,4 +1,5 @@
 MAJOR ISSUES:
+    (Done)
 	NO access control on any on the pages... customers can access all the staff
 	pages and do things without loggin it !!!
 
@@ -7,16 +8,16 @@ MAJOR ISSUES:
 
 EACH PAGE::::
 
-Viewflights
+Viewflights (Done)
 	- Filtering by Source and Dest
 		For my implementations, I made it a range but currently you are only
 		allowing only one source and one destination.
 	- the search by source gives you everything. Not sure if that is intended.
-	- base price is incorrect
+	- base price is incorrect (False)
 
 
 Addflight:
-	- I dont think the query you wrote works. There are repeated flights
+	- I dont think the query you wrote works. There are repeated flights (Done)
 	- can add flights with airplane that is already departed and hasn't landed yet
 		- I think it is because you are only checking for flightnum and not time
 
@@ -24,9 +25,9 @@ Updateflight status:
 	- The error message is wrong if the user enters incorrect depart date
 
 addPlane:
-	- anyone can view the page
-	- incorrect display message for wrong inputs
-	- the plane ID will not be exact for large numbers.
+	- anyone can view the page (Done)
+	- incorrect display message for wrong inputs (Done)
+	- the plane ID will not be exact for large numbers (Done)
 !!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -36,16 +37,16 @@ addPlane:
 !!!!!!!!!!!!!!!! I NEED TO CHECK THIS AS WELL !!!!!!!!!!!!!!!!!!!!!!!!!!
 
 addAirport:
-	- access control! I can add an airport as a customer
-	- key error
+	- access control! I can add an airport as a customer (Done)
+	- key error (Done)
 
 Viewflights:
-	Broken Acess Control: staff from UA are able to see Jetblue flights....
+	Broken Acess Control: staff from UA are able to see Jetblue flights.... (Done)
 
 
 frequent customers:
-	Broken Acess Control: anyone can view the user profile.
-	UA staff are able to view Jetblue customers!!!!
+	Broken Acess Control: anyone can view the user profile. (Done)
+	UA staff are able to view Jetblue customers!!!! (Done)
 
 viewReports:
 	I dont think the graph is correct
@@ -55,9 +56,9 @@ CompareRevenue:
 	I think the query is wrong for this.
 	I got month revenue = 130 but a year revenue of None.
 	
+Ask about what the correct values for w total amount of revenue earned from ticket sales in the last month and
+last year
 
 
 
 
-
-	
