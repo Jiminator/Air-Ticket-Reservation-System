@@ -71,7 +71,7 @@ def customerviewflights():
         SELECT DISTINCT *   
         FROM purchase natural join ticket natural join flight
         WHERE email=%s 
-        AND departure_date_time > NO    W()
+        AND departure_date_time > NOW()
         ORDER BY `ticket`.`departure_date_time` ASC
     """
     cursor.execute(display, (email))
