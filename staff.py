@@ -5,7 +5,7 @@ from app import *
 @app.route('/staffHome')
 def staff_home():
     try:
-        username = session['username']
+        username = session['username'] 
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('staffLogin.html', error=message)
