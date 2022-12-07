@@ -43,18 +43,16 @@ def compare_revenue():
 	cursor.execute(airline_query, (username))
 	airline = cursor.fetchone()
 	year = '''
-	SELECT SUM(sold_price) AS revenue FROM ticket, purchase
+	SELECT SUM(sold_price) AS revenue FROM ticket, purchase 
 	WHERE purchase.ticket_ID = ticket.ticket_ID AND airline_name = %s
-	AND YEAR(purchase_date_time) < YEAR(CURRENT_DATE);
+	AND purchase_date_time > DATE_SUB(NOW(), INTERVAL 365 DAY) and purchase_date_time < NOW();
 	'''
 	cursor.execute(year, (airline['airline_name']))
 	year_data = cursor.fetchone()
 	month = '''
-	SELECT SUM(sold_price) AS revenue FROM ticket, purchase
+	SELECT SUM(sold_price) AS revenue FROM ticket, purchase 
 	WHERE purchase.ticket_ID = ticket.ticket_ID AND airline_name = %s
-	AND YEAR(purchase_date_time) = YEAR(CURRENT_DATE)  
-	GROUP BY MONTHNAME(purchase_date_time)
-	ORDER BY MONTHNAME(purchase_date_time) ASC;
+	AND purchase_date_time > DATE_SUB(NOW(), INTERVAL 30 DAY) and purchase_date_time < NOW();
 	'''
 	cursor.execute(month, (airline['airline_name']))
 	month_data = cursor.fetchone()
@@ -113,7 +111,6 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 	cursor.execute(rangedTotalCost, tuple(variables))
 	rangedTotalCost = cursor.fetchone()['totalCost']
 
-	print(rangedTotalCost)
 	# I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
 	months = [None, "January", "February", "March", "April", "May", "June", "July",
 			  "August", "September", "October", "November", "December"]
@@ -201,10 +198,6 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 						   emonth=months[int(emonth)], noMonths=noMonths,
 						   tdyYear=tdyYear, tdyMonth=months[int(tdyMonth)], lstYear=lstYear, lstMonth=lstMonth,
 						   defaultYearCost=defaultYearCost, rangedTotalCost=rangedTotalCost)
-
-
-# totalCostYear=totalCostYear, display_months=display_months, 
-# percents=percents, pastXmonthsDisplay=pastXmonthsDisplay,valsOnly=valsOnly, 
 
 
 @app.route('/staffSpendingUpdate', methods=['GET', 'POST'])
