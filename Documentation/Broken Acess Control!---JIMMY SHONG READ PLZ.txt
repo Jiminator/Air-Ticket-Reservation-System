@@ -68,5 +68,3 @@ Delete extra files
 
 Go through document and make sure all use cases are properly filled
 
-Fix addflight error page
-
