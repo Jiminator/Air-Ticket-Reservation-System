@@ -2,16 +2,16 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 from app import app, conn
-import customer
-import login
-import flight
-import register
-import staff
-import status
 import airplane
 import airport
 import analytics
+import customer
+import flight
+import login
 import ratings
+import register
+import staff
+import status
 
 
 # Index page

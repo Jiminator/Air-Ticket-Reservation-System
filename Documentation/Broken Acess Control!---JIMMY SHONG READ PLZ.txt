@@ -56,15 +56,10 @@ CompareRevenue:
 	I think the query is wrong for this.
 	I got month revenue = 130 but a year revenue of None.
 
-rename all result html files to form
-
-add phone numbers staff register
 
 Go through all files and eliminate comments
 
-Change input types of html files
-
-Delete extra files
+Check input types of html files
 
 Go through document and make sure all use cases are properly filled
 
