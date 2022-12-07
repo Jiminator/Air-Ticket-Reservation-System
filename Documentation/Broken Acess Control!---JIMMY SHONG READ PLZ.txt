@@ -59,11 +59,16 @@ CompareRevenue:
 Ask about what the correct values for w total amount of revenue earned from ticket sales in the last month and
 last year
 
+Year Revenue: Current Date - 365 days
+Month Revenue: Current Date - 30 days
+
 add distinct to all queries
 
 add city search for staff
 
+add multiple phones/emails for staff/customers
 
+DElete extra files
 
 
 

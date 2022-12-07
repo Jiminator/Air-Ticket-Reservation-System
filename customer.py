@@ -268,7 +268,7 @@ def customerDelete():
             checker = True
         else:
             checker = False
-            message = 'This is an inalid ticketID. Please submit an ID that is from the list above. If the list is empty then you cannot cancel any tickets'
+            message = 'This is an invalid ticketID. Please submit an ID that is from the list above. If the list is empty then you cannot cancel any tickets'
     else:
         checker = False
     
