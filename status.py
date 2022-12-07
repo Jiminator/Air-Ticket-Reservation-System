@@ -11,8 +11,8 @@ def flight_status():
 	return render_template('flightStatus.html')
 
 
-@app.route('/flightStatusResult', methods=['GET', 'POST'])
-def flight_status_result():
+@app.route('/flightStatusForm', methods=['GET', 'POST'])
+def flight_status_form():
 	try:
 		username = session['username']
 	except Exception:

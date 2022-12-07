@@ -13,8 +13,8 @@ def add_airport():
 
 
 # Define route for adding new airport form
-@app.route('/addAirportResult', methods=['GET', 'POST'])
-def add_airport_result():
+@app.route('/addAirportForm', methods=['GET', 'POST'])
+def add_airport_form():
     try:
         username = session['username']
     except Exception:

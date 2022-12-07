@@ -11,8 +11,8 @@ def add_plane():
     return render_template('addPlane.html')
 
 
-@app.route('/addPlaneResult', methods=['GET', 'POST'])
-def add_plane_result():
+@app.route('/addPlaneForm', methods=['GET', 'POST'])
+def add_plane_form():
     try:
         username = session['username']
     except Exception:

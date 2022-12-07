@@ -104,8 +104,8 @@ def add_flight():
     return render_template('addFlight.html', flights = data, airport = airp_data, ID = airpID_data)
 
 
-@app.route('/addFlightResult', methods=['GET', 'POST'])
-def add_flight_result():
+@app.route('/addFlightForm', methods=['GET', 'POST'])
+def add_flight_form():
     try:
         username = session['username']
     except Exception:
