@@ -60,6 +60,10 @@ rename all result html files to form
 
 add phone numbers staff register
 
+Go through all files and eliminate comments
+
+Change input types of html files
+
 Delete extra files
 
 

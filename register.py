@@ -54,6 +54,7 @@ def staff_register_auth():
     first_name = request.form['firstname']
     last_name = request.form['lastname']
     email = request.form['email']
+    phone = request.form['phone']
     date_of_birth = request.form['dateofbirth']
     airline_name = request.form['airline']
 
@@ -80,6 +81,9 @@ def staff_register_auth():
             cursor.execute(ins, (username, password, first_name, last_name, date_of_birth, airline_name))
             ins = 'INSERT INTO staffEmail VALUES(%s, %s)'
             cursor.execute(ins, (username, email))
+            if phone:
+                ins = 'INSERT INTO staffPhone VALUES(%s, %s)'
+                cursor.execute(ins, (username, phone))
             conn.commit()
             cursor.close()
             session['username'] = username
