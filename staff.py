@@ -61,6 +61,70 @@ def staff_home():
                            topdestsyear=topdestsyear, flights=flights_data)
 
 
+# Add email to staff
+@app.route('/staffAddEmail')
+def staff_add_email():
+    return render_template('staffAddEmail.html')
+
+
+# add email
+@app.route('/staffAddEmailForm', methods=['GET', 'POST'])
+def staff_add_email_form():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
+    email = request.form['email']
+    cursor = conn.cursor()
+    query = 'SELECT DISTINCT * FROM staffEmail WHERE username = %s AND email = %s'
+    cursor.execute(query, (username, email))
+    data = cursor.fetchone()
+    error = None
+    if (data):
+        # returns an error message to the html page
+        error = 'Email already exists'
+        return render_template('staffAddEmail.html', error=error)
+    else:
+        ins = 'INSERT INTO staffEmail VALUES(%s, %s)'
+        cursor.execute(ins, (username, email))
+        conn.commit()
+        cursor.close()
+        return redirect(url_for('staff_add_email'))
+
+
+# Add phone to staff
+@app.route('/staffAddPhone')
+def staff_add_phone():
+    return render_template('staffAddPhone.html')
+
+
+# add phone
+@app.route('/staffAddPhoneForm', methods=['GET', 'POST'])
+def staff_add_phone_form():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
+    phone = request.form['phone']
+    cursor = conn.cursor()
+    query = 'SELECT DISTINCT * FROM staffPhone WHERE username = %s AND phone_number = %s'
+    cursor.execute(query, (username, phone))
+    data = cursor.fetchone()
+    error = None
+    if (data):
+        # returns an error message to the html page
+        error = 'Phone already exists'
+        return render_template('staffAddPhone.html', error=error)
+    else:
+        ins = 'INSERT INTO staffPhone VALUES(%s, %s)'
+        cursor.execute(ins, (username, phone))
+        conn.commit()
+        cursor.close()
+        return redirect(url_for('staff_add_phone'))
+
+
 # Define route for passenger list
 @app.route('/passengerList/<airline_name>/<flight_number>/<departure_date_time>/')
 def passenger_list(airline_name, flight_number, departure_date_time):

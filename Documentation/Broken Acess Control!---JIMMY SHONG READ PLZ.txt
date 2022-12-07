@@ -56,12 +56,11 @@ CompareRevenue:
 	I think the query is wrong for this.
 	I got month revenue = 130 but a year revenue of None.
 
+rename all result html files to form
 
-add city search for staff
+add phone numbers staff register
 
-add multiple phones/emails for staff/customers
-
-DElete extra files
+Delete extra files
 
 
 

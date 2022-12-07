@@ -1,0 +1,27 @@
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+
+<body>
+    <h2>
+        Add new phone
+    </h2>
+    <form action="/staffAddPhoneForm" method="POST">
+
+        <label for="phone">Phone Number:</label>
+        <input type="text" name="phone" placeholder="Phone Number" maxlength="15" required /></br></br>
+
+        <input type="submit" value=Add />
+		{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+		{% endif %}
+	</form>
+
+    <a href="/staffHome">Go back</a>
+
+</body>
+
+</html>
