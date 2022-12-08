@@ -32,7 +32,7 @@
             <td>{{line['airline_name']}}</td>
             <td>{{line['flight_number']}}</td>
             <td>{{line['departure_date_time']}}</td>
-            <td>{{line['avgRating']}}</td>
+            <td>{{line['avg_rating']}}</td>
             <td>
                 <a href = {{ url_for('all_flight_ratings' ,airlinename=line['airline_name'], flightnum=line['flight_number'], depdatetime=line['departure_date_time'] ) }}> Detail</a>
             </td>

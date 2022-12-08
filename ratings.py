@@ -17,7 +17,7 @@ def flight_ratings():
     cursor.execute(airline_query, (username))
     airline = cursor.fetchone()
     query = '''
-    SELECT airline_name, flight_number, departure_date_time, CAST(AVG(rating) AS DECIMAL(1,0)) AS avgRating 
+    SELECT airline_name, flight_number, departure_date_time, ROUND(AVG(rating),0) AS avg_rating 
     FROM interact WHERE airline_name = %s
     GROUP BY airline_name, flight_number, departure_date_time
     '''

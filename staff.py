@@ -13,41 +13,6 @@ def staff_home():
     query = 'SELECT * FROM airlinestaff WHERE username = %s'
     cursor.execute(query, username)
     userdata = cursor.fetchone()
-    query = """
-            SELECT DISTINCT
-                arrival_airport_name,
-                COUNT(*) AS ticketCount
-            FROM
-                purchase natural join flight natural join ticket
-            WHERE
-                DATE(purchase_date_time) >= DATE_ADD(CURRENT_DATE, INTERVAL -3 MONTH)
-            GROUP BY
-                arrival_airport_name
-            ORDER BY
-                ticketCount
-            DESC
-                LIMIT 3
-            """
-    cursor.execute(query)
-    topdestsmonth = cursor.fetchall()
-    query = """
-            SELECT DISTINCT
-                arrival_airport_name,
-                COUNT(*) AS ticketCount
-            FROM
-                purchase natural join flight natural join ticket
-            WHERE
-                DATE(purchase_date_time) >= DATE_ADD(CURRENT_DATE, INTERVAL -1 YEAR)
-            GROUP BY
-                arrival_airport_name
-            ORDER BY
-                ticketCount
-            DESC
-            LIMIT 3
-            """
-    cursor.execute(query)
-    topdestsyear = cursor.fetchall()
-
     query = '''
     SELECT * 
     FROM flight 
@@ -57,8 +22,7 @@ def staff_home():
     cursor.execute(query, (userdata['airline_name']))
     flights_data = cursor.fetchall()
     cursor.close()
-    return render_template('staffHome.html', airlinestaff=userdata, topdestsmonth=topdestsmonth,
-                           topdestsyear=topdestsyear, flights=flights_data)
+    return render_template('staffHome.html', airlinestaff=userdata, flights=flights_data)
 
 
 # Add email to staff
@@ -85,9 +49,7 @@ def staff_add_email_form():
     query = 'SELECT DISTINCT * FROM staffEmail WHERE username = %s AND email = %s'
     cursor.execute(query, (username, email))
     data = cursor.fetchone()
-    error = None
-    if (data):
-        # returns an error message to the html page
+    if data:
         error = 'Email already exists'
         return render_template('staffAddEmail.html', error=error)
     else:
@@ -98,7 +60,6 @@ def staff_add_email_form():
         return redirect(url_for('staff_add_email'))
 
 
-# Add phone to staff
 @app.route('/staffAddPhone')
 def staff_add_phone():
     try:
@@ -109,7 +70,6 @@ def staff_add_phone():
     return render_template('staffAddPhone.html')
 
 
-# add phone
 @app.route('/staffAddPhoneForm', methods=['GET', 'POST'])
 def staff_add_phone_form():
     try:
@@ -122,9 +82,7 @@ def staff_add_phone_form():
     query = 'SELECT DISTINCT * FROM staffPhone WHERE username = %s AND phone_number = %s'
     cursor.execute(query, (username, phone))
     data = cursor.fetchone()
-    error = None
-    if (data):
-        # returns an error message to the html page
+    if data:
         error = 'Phone already exists'
         return render_template('staffAddPhone.html', error=error)
     else:
@@ -149,7 +107,7 @@ def passenger_list(airline_name, flight_number, departure_date_time):
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
     if airline['airline_name'] != airline_name:
         message = 'You are not logged in to ' + airline_name
@@ -188,9 +146,11 @@ def bothSearch():
     print("dest_airport: ", dest_airport)
     if not source_airport and not dest_airport:
         query = '''
-        SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
+        SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, 
+        base_price, departure_airport_name, arrival_airport_name, airplane_ID 
         FROM airlineStaff, flight 
-        WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
+        WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 
+        AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
         '''
         cursor.execute(query, (airline['airline_name']))
     elif not source_airport:
@@ -200,12 +160,12 @@ def bothSearch():
         query = 'SELECT DISTINCT * FROM flight WHERE departure_airport_name = %s AND airline_name = %s'
         cursor.execute(query, (source_airport, airline['airline_name']))
     else:
-        query = 'SELECT * FROM flight WHERE (departure_airport_name = %s AND arrival_airport_name = %s) AND airline_name = %s'
+        query = 'SELECT * FROM flight WHERE (departure_airport_name = %s AND arrival_airport_name = %s) ' \
+                'AND airline_name = %s'
         cursor.execute(query, (source_airport, dest_airport, airline['airline_name']))
     data = cursor.fetchall()
     cursor.close()
     return render_template('staffViewFlights.html', flights=data)
-
 
 
 @app.route('/dateSearch', methods=['GET', 'POST'])
@@ -226,10 +186,11 @@ def dateSearch():
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
 
-    query = 'SELECT * FROM flight WHERE DATE(departure_date_time) >= %s AND DATE(departure_date_time) <= %s AND airline_name = %s'
+    query = 'SELECT * FROM flight ' \
+            'WHERE DATE(departure_date_time) >= %s AND DATE(departure_date_time) <= %s AND airline_name = %s'
     cursor.execute(query, (startdate, enddate, airline['airline_name']))
 
     data = cursor.fetchall()
@@ -250,12 +211,14 @@ def staffViewFlights():
         FROM airlineStaff 
         WHERE username = %s
         '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
     query = '''
-    SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID 
+    SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, 
+    base_price, departure_airport_name, arrival_airport_name, airplane_ID 
     FROM airlineStaff, flight 
-    WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
+    WHERE flight.airline_name = %s AND DATEDIFF(DATE(departure_date_time),CURRENT_DATE()) <= 30 
+    AND DATEDIFF(DATE(departure_date_time), CURRENT_DATE()) >= 0;
     '''
     cursor.execute(query, (airline['airline_name']))
     data = cursor.fetchall()
@@ -276,7 +239,7 @@ def frequent_customers():
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
 
     max_ticket_query = '''
@@ -299,7 +262,7 @@ def frequent_customers():
     AND ticket.airline_name = %s
     GROUP BY email HAVING ticket_count = %s
     '''
-    cursor.execute(query, (airline['airline_name'], max_data['max_ticket']) )
+    cursor.execute(query, (airline['airline_name'], max_data['max_ticket']))
     data = cursor.fetchall()
 
     cust_query = '''
@@ -327,16 +290,8 @@ def customer_flights(email):
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
-
-    key_query = '''
-    SELECT DISTINCT airline_name, flight_number, departure_date_time
-    FROM purchase, ticket WHERE purchase.ticket_ID = ticket.ticket_ID 
-    AND purchase.email = %s AND ticket.airline_name = %s;
-    '''
-    cursor.execute(key_query, (email, airline['airline_name']))
-    key_data = cursor.fetchall()
     query = '''
     SELECT DISTINCT flight.airline_name, flight.flight_number, flight.departure_date_time, 
     flight.arrival_date_time, flight.base_price, flight.flight_status, 
@@ -345,7 +300,8 @@ def customer_flights(email):
     WHERE ticket.airline_name = flight.airline_name AND ticket.flight_number = flight.flight_number 
     AND ticket.departure_date_time = flight.departure_date_time 
     AND purchase.ticket_ID = ticket.ticket_ID AND purchase.email = %s
-    AND ticket.airline_name = %s ORDER BY DATE(flight.departure_date_time);
+    AND ticket.airline_name = %s 
+    ORDER BY DATE(flight.departure_date_time);
     '''
     cursor.execute(query, (email, airline['airline_name']))
     data = cursor.fetchall()

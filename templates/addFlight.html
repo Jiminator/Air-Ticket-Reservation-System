@@ -49,27 +49,27 @@
     </h2>
     <form action="/addFlightForm" method="POST">
 
-        <label for="flight_number">Flight num:</label>
+        <label for="flight_number">Flight number:</label>
         <input type="text" name="flight_number" maxlength="9" required /></br></br>
 
-        <label for="departure_airport_name">Depart airport:</label>
+        <label for="departure_airport_name">Departure airport:</label>
         <select name="departure_airport_name">
             {% for line in airport %}
             <option value="{{ line.airport_name }}">{{ line.airport_name }}</option>
             {% endfor %}
         </select></br></br>
 
-        <label for="arrival_airport_name">Arrive airport:</label>
+        <label for="arrival_airport_name">Arrival airport:</label>
         <select name="arrival_airport_name">
             {% for line in airport %}
             <option value="{{ line.airport_name }}">{{ line.airport_name }}</option>
             {% endfor %}
         </select></br></br>
 
-        <label for="departure_date_time">Depart date:</label>
+        <label for="departure_date_time">Departure date:</label>
         <input type="datetime" name="departure_date_time" placeholder="yyyy-mm-dd 00:00:00" required /></br></br>
 
-        <label for="arrival_date_time">Arrive date:</label>
+        <label for="arrival_date_time">Arrival date:</label>
         <input type="datetime" name="arrival_date_time" placeholder="yyyy-mm-dd 00:00:00" required /></br></br>
 
         <label for="status">Flight status:</label>
