@@ -64,6 +64,11 @@ def staff_home():
 # Add email to staff
 @app.route('/staffAddEmail')
 def staff_add_email():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     return render_template('staffAddEmail.html')
 
 
@@ -96,6 +101,11 @@ def staff_add_email_form():
 # Add phone to staff
 @app.route('/staffAddPhone')
 def staff_add_phone():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
     return render_template('staffAddPhone.html')
 
 
