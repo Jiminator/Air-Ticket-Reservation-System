@@ -9,7 +9,7 @@ def add_plane():
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('staffLogin.html', error=message)
-    return render_template('addPlane.html')
+    return render_template('staffAddPlane.html')
 
 
 # form for staff to add plane
@@ -37,14 +37,14 @@ def add_plane_form():
     data = cursor.fetchone()
     if data:
         error = 'Airplane ID already exist'
-        return render_template('addPlane.html', error=error)
+        return render_template('staffAddPlane.html', error=error)
     else:
         ins = 'INSERT INTO airplane VALUES(%s, %s, %s, %s, %s)'
         cursor.execute(ins, (airline['airline_name'], airplaneID, seat, manufacturer, age))
         conn.commit()
         cursor.close()
         return redirect(url_for('add_plane_confirm', airlinename=airline['airline_name'], airplaneID=airplaneID))
-    return render_template('addPlane.html')
+    return render_template('staffAddPlane.html')
 
 
 # confirmation page for adding plane
@@ -64,4 +64,4 @@ def add_plane_confirm(airlinename, airplaneID):
     cursor.execute(query, airlinename)
     data = cursor.fetchall()
     cursor.close()
-    return render_template('addPlaneConfirm.html', plane=data, airplaneID=airplaneID)
+    return render_template('staffAddPlaneConfirm.html', plane=data, airplaneID=airplaneID)

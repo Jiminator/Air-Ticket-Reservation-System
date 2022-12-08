@@ -59,7 +59,7 @@ def compare_revenue():
 	cursor.execute(month, (airline['airline_name']))
 	month_data = cursor.fetchone()
 	cursor.close()
-	return render_template('compareRevenue.html', year=year_data, month=month_data)
+	return render_template('staffCompareRevenue.html', year=year_data, month=month_data)
 
 
 # displays the graphs of customer spending
@@ -73,7 +73,7 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 
 	if not validDates(filter_begin_date, filter_end_date):
 		message = "Cmon... the End date can't be before the start date..."
-		return render_template('dateChart.html', error=message)
+		return render_template('staffDateChart.html', error=message)
 	cursor = conn.cursor()
 	airline_query = '''
 	SELECT airline_name
@@ -168,7 +168,7 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 
 	lstYear, lstMonth = int(tdyYear) - 1, months[(int(tdyMonth) - 1)]
 
-	return render_template('dateChart.html', x_unformatted=x_unformatted,
+	return render_template('staffDateChart.html', x_unformatted=x_unformatted,
 						   y_unformatted=y_unformatted, byear=byear, bmonth=months[int(bmonth)], eyear=eyear,
 						   emonth=months[int(emonth)], noMonths=noMonths,
 						   tdyYear=tdyYear, tdyMonth=months[int(tdyMonth)], lstYear=lstYear, lstMonth=lstMonth,

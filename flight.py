@@ -96,7 +96,7 @@ def add_flight():
     cursor.execute(airpID_query, (airline['airline_name']))
     airpID_data = cursor.fetchall()
     cursor.close()
-    return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data)
+    return render_template('staffAddFlight.html', flights=data, airport=airp_data, ID=airpID_data)
 
 
 # form for staff to add flight
@@ -164,7 +164,7 @@ def add_flight_form():
 
     if final_data:
         error = 'Flight already exists'
-        return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data, error=error)
+        return render_template('staffAddFlight.html', flights=data, airport=airp_data, ID=airpID_data, error=error)
     else:
         airplaneID_query = '''
         SELECT departure_date_time, arrival_date_time
@@ -179,7 +179,7 @@ def add_flight_form():
         for date in impossible_dates:
             if date['departure_date_time'] <= departure_date_time <= date['arrival_date_time']:
                 error = 'Plane is in the air at that time.'
-                return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data, error=error)
+                return render_template('staffAddFlight.html', flights=data, airport=airp_data, ID=airpID_data, error=error)
         ins = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
         cursor.execute(ins,
             (airline['airline_name'], flightnum, depdatetime, arrdatetime, price, status, depairp, arrairp, airplaneID))

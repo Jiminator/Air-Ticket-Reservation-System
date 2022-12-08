@@ -9,7 +9,7 @@ def flight_status():
 	except Exception:
 		message = 'Please Login or Create an Account'
 		return render_template('staffLogin.html', error=message)
-	return render_template('flightStatus.html')
+	return render_template('staffFlightStatus.html')
 
 
 # form for staff to change flight status
@@ -46,4 +46,4 @@ def flight_status_form():
 		return redirect(url_for('flight_status'))
 	else:
 		error = 'Flight does not exist'
-		return render_template('flightStatus.html', error=error)
+		return render_template('staffFlightStatus.html', error=error)

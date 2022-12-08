@@ -9,7 +9,7 @@ def add_airport():
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('staffLogin.html', error=message)
-    return render_template('addAirport.html')
+    return render_template('staffAddAirport.html')
 
 
 # form for staff to add airport
@@ -31,11 +31,11 @@ def add_airport_form():
 
     if data:
         error = 'Airport already exist'
-        return render_template('addAirport.html', error=error)
+        return render_template('staffAddAirport.html', error=error)
     else:
         ins = 'INSERT INTO airport VALUES(%s, %s, %s, %s)'
         cursor.execute(ins, (airport, city, country, type))
         conn.commit()
         cursor.close()
-        return render_template('addAirport.html')
-    return render_template('addAirport.html')
+        return render_template('staffAddAirport.html')
+    return render_template('staffAddAirport.html')

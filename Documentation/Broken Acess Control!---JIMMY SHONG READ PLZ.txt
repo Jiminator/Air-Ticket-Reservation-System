@@ -57,9 +57,8 @@ CompareRevenue:
 	I got month revenue = 130 but a year revenue of None.
 
 
-Go through all files and eliminate comments
 
-Rename all files so they have staff in front of them
+Rename all files, so they have staff in front of them
 
 Rename all variables
 

@@ -25,7 +25,7 @@ def flight_ratings():
     cursor.execute(query, (airline['airline_name']))
     data = cursor.fetchall()
     cursor.close()
-    return render_template('flightRatings.html', rating=data)
+    return render_template('staffFlightRatings.html', rating=data)
 
 
 # displays ratings of a specific flight
@@ -55,4 +55,4 @@ def all_flight_ratings(airlinename, flightnum, depdatetime):
     cursor.execute(query, (airlinename, flightnum, depdatetime))
     data = cursor.fetchall()
     cursor.close()
-    return render_template('allFlightRatings.html', ratings=data)
+    return render_template('staffAllFlightRatings.html', ratings=data)

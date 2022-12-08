@@ -123,7 +123,7 @@ def passenger_list(airline_name, flight_number, departure_date_time):
     cursor.execute(query, (airline_name, flight_number, departure_date_time))
     data = cursor.fetchall()
     cursor.close()
-    return render_template('passengerList.html', passenger=data)
+    return render_template('staffPassengerList.html', passenger=data)
 
 
 # searching using airport names
@@ -311,7 +311,7 @@ def frequent_customers():
     cursor.execute(cust_query, (airline['airline_name']))
     cust_data = cursor.fetchall()
     cursor.close()
-    return render_template('frequentCustomers.html', customer=data, allCustomer=cust_data)
+    return render_template('staffFrequentCustomers.html', customer=data, allCustomer=cust_data)
 
 
 # get flights of a specific customer
