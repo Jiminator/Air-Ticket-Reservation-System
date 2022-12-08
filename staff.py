@@ -168,8 +168,8 @@ def bothSearch():
     return render_template('staffViewFlights.html', flights=data)
 
 
-@app.route('/dateSearch', methods=['GET', 'POST'])
-def dateSearch():
+@app.route('/dateDepSearch', methods=['GET', 'POST'])
+def dateDepSearch():
     try:
         username = session['username']
     except Exception:
@@ -191,6 +191,36 @@ def dateSearch():
 
     query = 'SELECT * FROM flight ' \
             'WHERE DATE(departure_date_time) >= %s AND DATE(departure_date_time) <= %s AND airline_name = %s'
+    cursor.execute(query, (startdate, enddate, airline['airline_name']))
+
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('staffViewFlights.html', flights=data)
+
+
+@app.route('/dateArrivSearch', methods=['GET', 'POST'])
+def dateArrivSearch():
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
+    startdate = request.form['startdate']
+    enddate = request.form['enddate']
+
+    username = session['username']
+    cursor = conn.cursor()
+
+    airline_query = '''
+    SELECT airline_name
+    FROM airlineStaff 
+    WHERE username = %s
+    '''
+    cursor.execute(airline_query, username)
+    airline = cursor.fetchone()
+
+    query = 'SELECT * FROM flight ' \
+            'WHERE DATE(arrival_date_time) >= %s AND DATE(arrival_date_time) <= %s AND airline_name = %s'
     cursor.execute(query, (startdate, enddate, airline['airline_name']))
 
     data = cursor.fetchall()
