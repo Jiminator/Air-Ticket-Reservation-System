@@ -58,7 +58,6 @@ CompareRevenue:
 
 
 
-Rename all files, so they have staff in front of them
 
 Rename all variables
 

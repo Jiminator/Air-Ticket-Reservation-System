@@ -42,19 +42,21 @@ def flight_search():
     if departdate:
         filter += ' AND departure_date_time >= %s'
         variables.append(departdate)
-    if returndate:
-        filter += ' AND arrival_date_time <= %s'
-        variables.append(returndate)
     filter += ' ORDER BY departure_date_time ASC;'
-
     if len(variables):
         cursor.execute(filter, tuple(variables))
     else:
         cursor.execute(filter)
-    display = cursor.fetchall()
-
+    data = cursor.fetchall()
+    # round-trip
+    if returndate != '' and departPort != '' and arrivPort != '' and departdate != '' and returndate >= departdate:
+        variables[0] = arrivPort
+        variables[1] = departPort
+        variables[2] = returndate
+        cursor.execute(filter, tuple(variables))
+        data += cursor.fetchall()
     cursor.close()
-    return render_template('viewFlights.html', flights=display)
+    return render_template('viewFlights.html', flights=data)
 
 
 # allows staff to add flight to database
