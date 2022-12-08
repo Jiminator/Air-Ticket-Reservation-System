@@ -1,22 +1,29 @@
 from app import *
 from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 
-
-def validDates(d1, d2):
-    if d1 == '' or d2 == '':
+def validDates(d1,d2):
+    max_endDate = datetime.today() + relativedelta(months=-5)
+    max_startDate = datetime.today()
+    if d1 == '' and d2 == '':
         return True
-    start = [int(i) for i in d1.split('-')]
-    end = [int(i) for i in d2.split('-')]
-    print(start)
-    print(end)
-    d1 = datetime(start[0], start[1], start[2])
-    d2 = datetime(end[0], end[1], end[2])
-    return d2 > d1
 
+    date1 = max_endDate
+    date2 = max_startDate
+    if d1:
+        start = [int(i) for i in d1.split('-')]
+        date1 = datetime(start[0], start[1], start[2])
+
+
+    if d2:
+        end = [int(i) for i in d2.split('-')]
+        date2 = datetime(end[0], end[1], end[2])
+
+    
+    return date2 > date1
 
 def yearmonthday(date):
     return str(date).split('-')
-
 
 def getNoMonths(d1, d2):
     d1 = datetime.strptime(d1, "%Y-%m-%d")
@@ -26,9 +33,8 @@ def getNoMonths(d1, d2):
         noMonths = 1
     return noMonths
 
-
 def removeFromDisplay(display, val):
-    newdisplay = []
+    newdisplay=[]
     for checkflight in display:
         flag = True
         for currFlight in val:
@@ -50,7 +56,7 @@ def customerHome():
         return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
     query = 'SELECT * FROM customer WHERE email = %s'
-    cursor.execute(query, email)
+    cursor.execute(query, (email))
     userdata = cursor.fetchone()
     query = """
         SELECT DISTINCT *   
@@ -58,11 +64,10 @@ def customerHome():
         WHERE email=%s 
         AND departure_date_time > NOW();
     """
-    cursor.execute(query, email)
+    cursor.execute(query, (email))
     flightdata = cursor.fetchall()
     cursor.close()
     return render_template('customerHome.html', customer=userdata, flights=flightdata)
-
 
 @app.route('/customerviewflights', methods=['GET', 'POST'])
 def customerviewflights():
@@ -79,10 +84,49 @@ def customerviewflights():
         AND departure_date_time > NOW()
         ORDER BY `ticket`.`departure_date_time` ASC
     """
-    cursor.execute(display, email)
+    cursor.execute(display, (email))
     flightdata = cursor.fetchall()
     cursor.close()
     return render_template('customerviewflights.html', flights=flightdata)
+
+# @app.route('/customerviewflightsUpdate', methods=['GET', 'POST'])
+# def customerviewflightsUpdate():
+#     try:
+#         email = session['email']
+#     except Exception:
+#         message = 'Please Login or Create an Account'
+#         return render_template('customerLogin.html', error=message)
+#     cursor = conn.cursor()
+
+#     departPort = request.form['departureairport']
+#     arrivPort = request.form["arrivalairport"]
+#     departdate = request.form["departdate"]
+#     returndate = request.form["returndate"]
+
+#     filter = """
+#     SELECT DISTINCT *   
+#     FROM purchase natural join ticket natural join flight
+#     WHERE email=%s AND departure_date_time > NOW()"""
+#     variables = [email]
+#     if departPort:
+#         filter += ' AND departure_airport_name=%s'
+#         variables.append(departPort)
+#     if arrivPort:
+#         filter += ' AND arrival_airport_name=%s'
+#         variables.append(arrivPort)
+#     if departdate:
+#         filter += ' AND departure_date_time >= %s'
+#         variables.append(departdate)
+#     if returndate:
+#         filter += ' AND arrival_date_time <= %s'
+#         variables.append(returndate)
+#     filter += ' ORDER BY `ticket`.`departure_date_time` ASC;'
+#     cursor.execute(filter, tuple(variables))
+#     display = cursor.fetchall()
+
+
+#     cursor.close()
+#     return render_template('customerviewflights.html', flights=display)
 
 
 @app.route('/customerviewflightsUpdate', methods=['GET', 'POST'])
@@ -92,37 +136,6 @@ def customerviewflightsUpdate():
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('customerLogin.html', error=message)
-
-    # cursor = conn.cursor()
-    #
-    # departPort = request.form['departureairport']
-    # arrivPort = request.form["arrivalairport"]
-    # departdate = request.form["departdate"]
-    # returndate = request.form["returndate"]
-    #
-    # filter = """
-    # SELECT DISTINCT *
-    # FROM purchase natural join ticket natural join flight
-    # WHERE email=%s AND departure_date_time > NOW()"""
-    # variables = [email]
-    # if departPort:
-    #     filter += ' AND departure_airport_name=%s'
-    #     variables.append(departPort)
-    # if arrivPort:
-    #     filter += ' AND arrival_airport_name=%s'
-    #     variables.append(arrivPort)
-    # if departdate:
-    #     filter += ' AND departure_date_time >= %s'
-    #     variables.append(departdate)
-    # if returndate:
-    #     filter += ' AND arrival_date_time <= %s'
-    #     variables.append(returndate)
-    # filter += ' ORDER BY `ticket`.`departure_date_time` ASC;'
-    # cursor.execute(filter, tuple(variables))
-    # display = cursor.fetchall()
-    #
-    # cursor.close()
-    # return render_template('customerviewflights.html', flights=display)
     cursor = conn.cursor()
 
     departPort = request.form['departureairport']
@@ -131,7 +144,7 @@ def customerviewflightsUpdate():
     returndate = request.form["returndate"]
 
     filter = """
-    SELECT DISTINCT *   
+    SELECT DISTINCT *
     FROM purchase natural join ticket natural join flight
     WHERE email=%s AND departure_date_time > NOW()"""
     variables = [email]
@@ -144,7 +157,7 @@ def customerviewflightsUpdate():
     if departdate:
         filter += ' AND departure_date_time >= %s'
         variables.append(departdate)
-    filter += ' ORDER BY `ticket`.`departure_date_time` ASC;'
+    filter += ' ORDER BY ticket.departure_date_time ASC;'
     if len(variables):
         cursor.execute(filter, tuple(variables))
     else:
@@ -160,7 +173,6 @@ def customerviewflightsUpdate():
     cursor.close()
     return render_template('customerviewflights.html', flights=data)
 
-
 # Logout for customers and agents
 @app.route('/customerLogout')
 def logoutCustomer():
@@ -169,9 +181,8 @@ def logoutCustomer():
     message = 'You have Successfully Logged Out'
     return render_template('customerLogin.html', error=message, flag=flag)
 
-
 @app.route('/customerPurchase', methods=['GET', 'POST'])
-def customerPurchase(ticketID='', cardType='', name='', cardNumber='', expDate=''):
+def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',expDate =''):
     try:
         email = session['email']
     except Exception:
@@ -185,8 +196,9 @@ def customerPurchase(ticketID='', cardType='', name='', cardNumber='', expDate='
         WHERE email = %s
         AND departure_date_time >= NOW();
     """
-    cursor.execute(purchases, email)
+    cursor.execute(purchases, (email))
     purchases = cursor.fetchall()
+
 
     # Only will filter the tickets that aren't cancelled and 
     # are in the future. DOESN"T CHECK if the number of seats
@@ -233,22 +245,22 @@ def customerPurchase(ticketID='', cardType='', name='', cardNumber='', expDate='
         checkForRepurchase = 'SELECT * FROM purchase WHERE ticket_ID=%s AND email=%s'
         cursor.execute(checkForRepurchase, (ticketID, email))
         checkForRepurchase = cursor.fetchone()
-        # checks for repurchase error
+        #checks for repurchase error
         if checkForRepurchase:
             message = "Error: You have already purchased this Ticket!"
         else:
             popval = None
             # find the index
-            for i, flight in enumerate(finalDisplay):
+            for i,flight in enumerate(finalDisplay):
                 if int(flight['ticket_ID']) == int(ticketID):
                     popval = i
             purchase = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
-            cursor.execute(purchase, (ticketID, email, finalDisplay[popval]['base_price'], cardType, cardNumber, name, expDate))
+            cursor.execute(purchase, (ticketID, email, finalDisplay[popval]['base_price'], cardType, cardNumber,name, expDate))
             conn.commit()
             message = "Success: this is confirmation of your purchase"
             flag = True
 
-            # need to now update the table
+            #need to now update the table
             if popval is not None:
                 finalDisplay.pop(popval)
     
@@ -260,7 +272,6 @@ def customerPurchase(ticketID='', cardType='', name='', cardNumber='', expDate='
     today = date.today()
     today = today.strftime("%b-%d-%Y")
     return render_template('customerPurchase.html', flights=finalDisplay, error=message, flag=flag, today=today)
-
 
 @app.route('/customerPurchaseUpdate', methods=['GET', 'POST'])
 def customerPurchaseUpdate():
@@ -274,7 +285,7 @@ def customerPurchaseUpdate():
     name = request.form['Name of Card']
     cardNumber = request.form['cc-number']
     expDate = request.form["expiration start"]
-    return customerPurchase(ticketID, cardType, name, cardNumber, expDate)
+    return customerPurchase(ticketID, cardType, name , cardNumber,expDate)
 
 
 @app.route('/customerDelete', methods=['GET', 'POST'])
@@ -290,7 +301,7 @@ def customerDelete():
     WHERE email = %s
     AND departure_date_time >= NOW() - INTERVAL 1 DAY;
     """
-    cursor.execute(available, email)
+    cursor.execute(available, (email))
     flightdata = cursor.fetchall()
     try:
         ticket_ID = request.form['ticket_ID']
@@ -298,7 +309,7 @@ def customerDelete():
         ticket_ID = None
 
     isvalid = [str(ticketIDs['ticket_ID']) for ticketIDs in flightdata]
-    message = ''
+    message= ''
     if ticket_ID:
         if ticket_ID in isvalid:
             deleteQuery = """
@@ -315,17 +326,21 @@ def customerDelete():
             message = 'This is an invalid ticketID. Please submit an ID that is from the list above. If the list is empty then you cannot cancel any tickets'
     else:
         checker = False
+    
 
     available = """
     SELECT * FROM purchase NATURAL JOIN ticket NATURAL JOIN flight
     WHERE email = %s
     AND departure_date_time >= NOW() - INTERVAL 1 DAY;
     """
-    cursor.execute(available, email)
+    cursor.execute(available, (email))
     flightdata = cursor.fetchall()
 
     cursor.close()
-    return render_template('customerDelete.html', flights=flightdata, checker=checker, error=message, success=message)
+    return render_template('customerDelete.html', flights=flightdata, checker=checker,error=message, success=message)  
+
+
+
 
 
 @app.route('/customerRateflight', methods=['GET', 'POST'])
@@ -341,7 +356,7 @@ def customerRateflights():
         flight NATURAL JOIN ticket
         WHERE email=%s AND arrival_date_time < NOW();
     """
-    cursor.execute(query, email)
+    cursor.execute(query, (email))
     flightdata = cursor.fetchall()
     cursor.close()
     return render_template('customerRateflight.html', flights=flightdata)
@@ -360,14 +375,14 @@ def customerRateflightsUpdate():
     flight NATURAL JOIN ticket
     WHERE email=%s AND arrival_date_time < NOW();
     """
-    cursor.execute(display, email)
+    cursor.execute(display, (email))
     flightdata = cursor.fetchall()
 
     flightNo = request.form['flightNo']
     review = request.form["review"]
     rating = request.form['Rating']
 
-    # all the valid flights that the user can rate are stored in valid_flights
+    #all the valid flights that the user can rate are stored in valid_flights
     valid_flights = []
     index = 0
     for i, value in enumerate(flightdata):
@@ -375,13 +390,16 @@ def customerRateflightsUpdate():
         valid_flights.append(curr)
         if flightdata[i]['flight_number'] == flightNo:
             index = i
+    
 
-    # checks if the inputted flight number is valid
+
+
+    #checks if the inputted flight number is valid
     if flightNo in valid_flights:
         airline_name = flightdata[index]['airline_name']
         departure_date_time = flightdata[index]['departure_date_time']
 
-        # checks if the user has already given a rating for that flight
+        #checks if the user has already given a rating for that flight
         prevRatings = "SELECT * FROM interact WHERE email=%s AND flight_number=%s AND airline_name=%s"
         cursor.execute(prevRatings, (email, flightNo, airline_name))
         prevRatings = cursor.fetchall()
@@ -398,6 +416,7 @@ def customerRateflightsUpdate():
     return render_template('customerRateflight.html', error=message, flights=flightdata)
 
 
+
 @app.route('/customerSpending', methods=['GET', 'POST'])
 def customerSpending(filter_begin_date='', filter_end_date=''):
     try:
@@ -407,9 +426,10 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         return render_template('customerLogin.html', error=message)
 
     if not validDates(filter_begin_date, filter_end_date):
-        message = "Cmon... the End date can't be before the start date..."
+        message = "The dates you entered could not be executed. Please enter correct dates."
         return render_template('customerSpending.html', error=message)
     cursor = conn.cursor()
+
 
     # the default is to show the cost of 1 year
     defaultYearCost = """
@@ -418,8 +438,9 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         WHERE email=%s
         AND purchase_date_time>=date_sub(now(), interval 1 year);
     """
-    cursor.execute(defaultYearCost, email)
+    cursor.execute(defaultYearCost, (email))
     defaultYearCost = cursor.fetchone()['totalCost']
+
 
     variables = [email]
     rangedTotalCost = """
@@ -442,9 +463,14 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
     cursor.execute(rangedTotalCost, tuple(variables))
     rangedTotalCost = cursor.fetchone()['totalCost']
 
+
+    print(rangedTotalCost)
     # I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
     months = [None, "January", "February", "March", "April", "May", "June", "July", 
             "August", "September", "October", "November", "December"]
+  
+
+                                
 
     today = date.today()
     today = today.strftime("%b-%d-%Y")
@@ -457,15 +483,16 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         cursor.execute(query)
         filter_begin_date = cursor.fetchone()['date']  
 
-    # noMonths will be the number of months difference between begin and end date.
+    #noMonths will be the number of months difference between begin and end date.
     noMonths = getNoMonths(str(filter_begin_date), str(filter_end_date))
 
-    byear, bmonth, bday = yearmonthday(filter_begin_date)
-    eyear, emonth, eday = yearmonthday(filter_end_date)
 
-    # formats the year and month for me
+    byear,bmonth,bday = yearmonthday(filter_begin_date)
+    eyear,emonth,eday = yearmonthday(filter_end_date)
+
+    #formats the year and month for me
     display_months = []
-    tyear, tmonth, tday = int(eyear), int(emonth), int(eday)
+    tyear,tmonth,tday = int(eyear),int(emonth),int(eday)
     for i in range(noMonths):
         if tmonth == 0:
             tmonth = 12
@@ -478,7 +505,6 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
     # when the loop is finished it should look like this
     # display_months looks like ['December 2022', 'November 2022', 'October 2022', 'September 2022', 'August 2022', 'July 2022', 'June 2022', 'May 2022', 'April 2022', 'March 2022', 'February 2022', 'January 2022']        
     # this will be the x axis
-
     # get the total cost of between the range
     if rangedTotalCost:
         rangedTotalCost = float(rangedTotalCost)
@@ -486,15 +512,16 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         rangedTotalCost = 0
     rangedTotalCost = "{:.2f}".format(rangedTotalCost)
 
-    # CALCULATING THE PERCENTS
+    #CALCULATING THE PERCENTS
 
     monthYear = []  # this will hold the X-Axis Values
     percents = []   # this will hold the Bar graph hieghts
     valsOnly=[]     # this will hold the Y-Axis Values  
     for i in display_months:
         i = i.split()
-        i.append(months.index(i[0]))  # trying to get the numeric value for the month
+        i.append(months.index(i[0])) # trying to get the numeric value for the month
         monthYear.append(i)
+
 
     for i in monthYear:
         percent = """
@@ -505,18 +532,24 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
         """
         cursor.execute(percent, (email, str(i[1]), str(i[2])))
         val = cursor.fetchone()['price']
-        if val:
+        if float(rangedTotalCost) and val:
             val = float(val)
             percents.append(["{:.2f}".format(val), "{:.2f}".format((val/float(rangedTotalCost)) * 100)])
+            valsOnly.append("{:.2f}".format(val))
+        elif val: 
+            val = float(val)
+            percents.append(["{:.2f}".format(val), "{:.2f}".format(100)])
             valsOnly.append("{:.2f}".format(val))
         else:
             percents.append([0, 1])
             valsOnly.append("{:.2f}".format(0))
 
-        # percents is formatted so that percents[0] is the $$ and percents[1] is the Hieght
+        #percents is formatted so that percents[0] is the $$ and percents[1] is the Hieght
 
     x_unformatted = '-'.join(display_months)
     y_unformatted = '-'.join(valsOnly)
+
+
 
     today = date.today()
     today = today.strftime("%d/%m/%Y")
@@ -525,8 +558,15 @@ def customerSpending(filter_begin_date='', filter_end_date=''):
     lstYear, lstMonth = int(tdyYear) - 1, months[(int(tdyMonth)-1)]
 
     return render_template('customerSpending.html', x_unformatted=x_unformatted, 
-   y_unformatted=y_unformatted, byear=byear, bmonth=months[int(bmonth)], eyear=eyear, emonth=months[int(emonth)], noMonths=noMonths,
+   y_unformatted=y_unformatted, byear=byear,bmonth=months[int(bmonth)], eyear=eyear, emonth=months[int(emonth)], noMonths=noMonths,
    tdyYear=tdyYear, tdyMonth=months[int(tdyMonth)], lstYear=lstYear, lstMonth=lstMonth, defaultYearCost=defaultYearCost, rangedTotalCost=rangedTotalCost)
+
+
+# totalCostYear=totalCostYear, display_months=display_months, 
+# percents=percents, pastXmonthsDisplay=pastXmonthsDisplay,valsOnly=valsOnly, 
+   
+
+
 
 
 @app.route('/customerSpendingUpdate', methods=['GET', 'POST'])
@@ -539,3 +579,12 @@ def customerSpendingUpdate():
         message = 'Please Login or Create an Account'
         return render_template('customerLogin.html', error=message)
     return customerSpending(filter_begin_date, filter_end_date)
+
+
+
+
+
+
+
+
+

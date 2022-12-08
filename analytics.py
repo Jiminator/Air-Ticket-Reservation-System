@@ -1,16 +1,29 @@
 from app import *
 from datetime import datetime, date
-
+from dateutil.relativedelta import relativedelta
 
 # gets all possible dates
-def validDates(d1, d2):
-    if d1 == '' or d2 == '':
+
+def validDates(d1,d2):
+    max_endDate = datetime.today() + relativedelta(months=-5)
+    max_startDate = datetime.today()
+    if d1 == '' and d2 == '':
         return True
-    start = [int(i) for i in d1.split('-')]
-    end = [int(i) for i in d2.split('-')]
-    d1 = datetime(start[0], start[1], start[2])
-    d2 = datetime(end[0], end[1], end[2])
-    return d2 > d1
+
+    date1 = max_endDate
+    date2 = max_startDate
+    if d1:
+        start = [int(i) for i in d1.split('-')]
+        date1 = datetime(start[0], start[1], start[2])
+
+
+    if d2:
+        end = [int(i) for i in d2.split('-')]
+        date2 = datetime(end[0], end[1], end[2])
+
+    
+    return date2 > date1
+
 
 
 # gets the year month and day
@@ -72,7 +85,7 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 		return render_template('staffLogin.html', error=message)
 
 	if not validDates(filter_begin_date, filter_end_date):
-		message = "Cmon... the End date can't be before the start date..."
+		message = "The date you entered could not be executed. Please choose a valid date."
 		return render_template('staffDateChart.html', error=message)
 	cursor = conn.cursor()
 	airline_query = '''
@@ -152,9 +165,13 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 		"""
 		cursor.execute(percent, (airline['airline_name'], str(i[1]), str(i[2])))
 		val = cursor.fetchone()['price']
-		if val:
+		if val and float(rangedTotalCost):
 			val = float(val)
 			percents.append(["{:.2f}".format(val), "{:.2f}".format((val / float(rangedTotalCost)) * 100)])
+			valsOnly.append("{:.2f}".format(val))
+		elif val:
+			val = float(val)
+			percents.append(["{:.2f}".format(val), "{:.2f}".format(100)])
 			valsOnly.append("{:.2f}".format(val))
 		else:
 			percents.append([0, 1])
