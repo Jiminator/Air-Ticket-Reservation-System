@@ -92,6 +92,37 @@ def customerviewflightsUpdate():
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('customerLogin.html', error=message)
+
+    # cursor = conn.cursor()
+    #
+    # departPort = request.form['departureairport']
+    # arrivPort = request.form["arrivalairport"]
+    # departdate = request.form["departdate"]
+    # returndate = request.form["returndate"]
+    #
+    # filter = """
+    # SELECT DISTINCT *
+    # FROM purchase natural join ticket natural join flight
+    # WHERE email=%s AND departure_date_time > NOW()"""
+    # variables = [email]
+    # if departPort:
+    #     filter += ' AND departure_airport_name=%s'
+    #     variables.append(departPort)
+    # if arrivPort:
+    #     filter += ' AND arrival_airport_name=%s'
+    #     variables.append(arrivPort)
+    # if departdate:
+    #     filter += ' AND departure_date_time >= %s'
+    #     variables.append(departdate)
+    # if returndate:
+    #     filter += ' AND arrival_date_time <= %s'
+    #     variables.append(returndate)
+    # filter += ' ORDER BY `ticket`.`departure_date_time` ASC;'
+    # cursor.execute(filter, tuple(variables))
+    # display = cursor.fetchall()
+    #
+    # cursor.close()
+    # return render_template('customerviewflights.html', flights=display)
     cursor = conn.cursor()
 
     departPort = request.form['departureairport']
@@ -113,15 +144,21 @@ def customerviewflightsUpdate():
     if departdate:
         filter += ' AND departure_date_time >= %s'
         variables.append(departdate)
-    if returndate:
-        filter += ' AND arrival_date_time <= %s'
-        variables.append(returndate)
     filter += ' ORDER BY `ticket`.`departure_date_time` ASC;'
-    cursor.execute(filter, tuple(variables))
-    display = cursor.fetchall()
-
+    if len(variables):
+        cursor.execute(filter, tuple(variables))
+    else:
+        cursor.execute(filter)
+    data = cursor.fetchall()
+    # round-trip
+    if returndate != '' and departPort != '' and arrivPort != '' and departdate != '' and returndate >= departdate:
+        variables[1] = arrivPort
+        variables[2] = departPort
+        variables[3] = returndate
+        cursor.execute(filter, tuple(variables))
+        data += cursor.fetchall()
     cursor.close()
-    return render_template('customerviewflights.html', flights=display)
+    return render_template('customerviewflights.html', flights=data)
 
 
 # Logout for customers and agents
