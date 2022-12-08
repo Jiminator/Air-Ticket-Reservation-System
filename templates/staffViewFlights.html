@@ -8,8 +8,8 @@
 
     Search by both source and/or destination </br>
     <form action="/bothSearch" method="POST">
-        <input type="text" name="sourceairport" maxlength="20"/></br>
-        <input type="text" name="destairport" maxlength="20"/></br>
+        <input type="text" name="sourceairport" maxlength="255"/></br>
+        <input type="text" name="destairport" maxlength="255"/></br>
         <input type="submit" value=Search />
         {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
