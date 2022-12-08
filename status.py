@@ -1,6 +1,7 @@
 from app import *
 
 
+# rendering template for flight status
 @app.route('/flightStatus')
 def flight_status():
 	try:
@@ -11,6 +12,7 @@ def flight_status():
 	return render_template('flightStatus.html')
 
 
+# form for staff to change flight status
 @app.route('/flightStatusForm', methods=['GET', 'POST'])
 def flight_status_form():
 	try:
@@ -43,6 +45,5 @@ def flight_status_form():
 		cursor.close()
 		return redirect(url_for('flight_status'))
 	else:
-		# returns an error message to the html page
 		error = 'Flight does not exist'
 		return render_template('flightStatus.html', error=error)

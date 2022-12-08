@@ -1,6 +1,7 @@
 from app import *
 
 
+# renders add plane template
 @app.route('/addPlane')
 def add_plane():
     try:
@@ -11,6 +12,7 @@ def add_plane():
     return render_template('addPlane.html')
 
 
+# form for staff to add plane
 @app.route('/addPlaneForm', methods=['GET', 'POST'])
 def add_plane_form():
     try:
@@ -45,6 +47,7 @@ def add_plane_form():
     return render_template('addPlane.html')
 
 
+# confirmation page for adding plane
 @app.route('/addPlaneConfirm/<airlinename>/<airplaneID>/')
 def add_plane_confirm(airlinename, airplaneID):
     try:

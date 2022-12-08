@@ -57,6 +57,7 @@ def flight_search():
     return render_template('viewFlights.html', flights=display)
 
 
+# allows staff to add flight to database
 @app.route('/addFlight')
 def add_flight():
     try:
@@ -98,6 +99,7 @@ def add_flight():
     return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data)
 
 
+# form for staff to add flight
 @app.route('/addFlightForm', methods=['GET', 'POST'])
 def add_flight_form():
     try:
@@ -161,7 +163,6 @@ def add_flight_form():
     final_data = cursor.fetchone()
 
     if final_data:
-        # returns an error message to the html page
         error = 'Flight already exists'
         return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data, error=error)
     else:

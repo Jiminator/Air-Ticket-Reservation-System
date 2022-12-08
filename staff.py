@@ -36,7 +36,7 @@ def staff_add_email():
     return render_template('staffAddEmail.html')
 
 
-# add email
+# form for adding email
 @app.route('/staffAddEmailForm', methods=['GET', 'POST'])
 def staff_add_email_form():
     try:
@@ -60,6 +60,7 @@ def staff_add_email_form():
         return redirect(url_for('staff_add_email'))
 
 
+# render phone template
 @app.route('/staffAddPhone')
 def staff_add_phone():
     try:
@@ -70,6 +71,7 @@ def staff_add_phone():
     return render_template('staffAddPhone.html')
 
 
+# form for adding phone
 @app.route('/staffAddPhoneForm', methods=['GET', 'POST'])
 def staff_add_phone_form():
     try:
@@ -124,6 +126,7 @@ def passenger_list(airline_name, flight_number, departure_date_time):
     return render_template('passengerList.html', passenger=data)
 
 
+# searching using airport names
 @app.route('/bothSearch', methods=['GET', 'POST'])
 def bothSearch():
     try:
@@ -168,6 +171,7 @@ def bothSearch():
     return render_template('staffViewFlights.html', flights=data)
 
 
+# allow searching using department date
 @app.route('/dateDepSearch', methods=['GET', 'POST'])
 def dateDepSearch():
     try:
@@ -198,6 +202,7 @@ def dateDepSearch():
     return render_template('staffViewFlights.html', flights=data)
 
 
+# allow searching using arrival date
 @app.route('/dateArrivSearch', methods=['GET', 'POST'])
 def dateArrivSearch():
     try:
@@ -228,6 +233,7 @@ def dateArrivSearch():
     return render_template('staffViewFlights.html', flights=data)
 
 
+# display flights from a staff view
 @app.route('/staffViewFlights')
 def staffViewFlights():
     try:
@@ -256,6 +262,7 @@ def staffViewFlights():
     return render_template('staffViewFlights.html', flights=data)
 
 
+# display the most frequent customers
 @app.route('/frequentCustomers')
 def frequent_customers():
     try:
@@ -307,6 +314,7 @@ def frequent_customers():
     return render_template('frequentCustomers.html', customer=data, allCustomer=cust_data)
 
 
+# get flights of a specific customer
 @app.route('/customerFlights/<email>/')
 def customer_flights(email):
     try:

@@ -2,22 +2,23 @@ from app import *
 from datetime import datetime, date
 
 
+# gets all possible dates
 def validDates(d1, d2):
     if d1 == '' or d2 == '':
         return True
     start = [int(i) for i in d1.split('-')]
     end = [int(i) for i in d2.split('-')]
-    print(start)
-    print(end)
     d1 = datetime(start[0], start[1], start[2])
     d2 = datetime(end[0], end[1], end[2])
     return d2 > d1
 
 
+# gets the year month and day
 def yearmonthday(date):
     return str(date).split('-')
 
 
+# gets the number of months
 def getNoMonths(d1, d2):
     d1 = datetime.strptime(d1, "%Y-%m-%d")
     d2 = datetime.strptime(d2, "%Y-%m-%d")
@@ -27,6 +28,7 @@ def getNoMonths(d1, d2):
     return noMonths
 
 
+# display revenue statistics
 @app.route('/compareRevenue')
 def compare_revenue():
 	try:
@@ -60,6 +62,7 @@ def compare_revenue():
 	return render_template('compareRevenue.html', year=year_data, month=month_data)
 
 
+# displays the graphs of customer spending
 @app.route('/staffSpending', methods=['GET', 'POST'])
 def staffSpending(filter_begin_date='', filter_end_date=''):
 	try:
@@ -79,8 +82,6 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 	'''
 	cursor.execute(airline_query, username)
 	airline = cursor.fetchone()
-
-	# the default is to show the cost of 1 year
 	defaultYearCost = """
 		SELECT SUM(sold_price) as totalCost  
 		FROM purchase natural join ticket natural join flight
@@ -96,8 +97,6 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 	FROM purchase natural join ticket natural join flight
 	WHERE airline_name=%s
 	"""
-
-	# make query more specific if the user gives us the dates
 	if filter_begin_date != '' or filter_end_date != '':
 		if filter_begin_date != '':
 			rangedTotalCost += ' AND purchase_date_time>=%s'
@@ -106,33 +105,22 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 			rangedTotalCost += ' AND purchase_date_time<=%s'
 			variables.append(filter_end_date)
 	else:
-		# I included the current month so I only subtract by 5.
 		rangedTotalCost += ' AND purchase_date_time>=date_sub(now(), interval 5 month) '
 	cursor.execute(rangedTotalCost, tuple(variables))
 	rangedTotalCost = cursor.fetchone()['totalCost']
 
-	# I added a None is the front to make it easier for indexing...so month 1/index 1 = Jan, month5/index5 = May...etc
 	months = [None, "January", "February", "March", "April", "May", "June", "July",
 			  "August", "September", "October", "November", "December"]
 
-	today = date.today()
-	today = today.strftime("%b-%d-%Y")
-	# Setting start date to default ===== current date 
 	if filter_end_date == '':
 		filter_end_date = date.today()
-	# Setting begin date to default ===== current date - 6 months 
 	if filter_begin_date == "":
 		query = 'select DATE(date_sub(now(), interval 5 month)) as date'
 		cursor.execute(query)
 		filter_begin_date = cursor.fetchone()['date']
-
-	# noMonths will be the number of months difference between begin and end date.
 	noMonths = getNoMonths(str(filter_begin_date), str(filter_end_date))
-
 	byear, bmonth, bday = yearmonthday(filter_begin_date)
 	eyear, emonth, eday = yearmonthday(filter_end_date)
-
-	# formats the year and month for me
 	display_months = []
 	tyear, tmonth, tday = int(eyear), int(emonth), int(eday)
 	for i in range(noMonths):
@@ -143,20 +131,11 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 		temp = months[tmonth] + ' ' + str(tyear)
 		display_months.append(temp)
 		tmonth -= 1
-
-	# when the loop is finished it should look like this
-	# display_months looks like ['December 2022', 'November 2022', 'October 2022', 'September 2022', 'August 2022', 'July 2022', 'June 2022', 'May 2022', 'April 2022', 'March 2022', 'February 2022', 'January 2022']        
-	# this will be the x axis
-
-	# get the total cost of between the range
 	if rangedTotalCost:
 		rangedTotalCost = float(rangedTotalCost)
 	else:
 		rangedTotalCost = 0
 	rangedTotalCost = "{:.2f}".format(rangedTotalCost)
-
-	# CALCULATING THE PERCENTS
-
 	monthYear = []  # this will hold the X-Axis Values
 	percents = []  # this will hold the Bar graph hieghts
 	valsOnly = []  # this will hold the Y-Axis Values  
@@ -164,7 +143,6 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 		i = i.split()
 		i.append(months.index(i[0]))  # trying to get the numeric value for the month
 		monthYear.append(i)
-
 	for i in monthYear:
 		percent = """
 		select SUM(sold_price) as price from purchase natural join ticket
@@ -181,9 +159,6 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 		else:
 			percents.append([0, 1])
 			valsOnly.append("{:.2f}".format(0))
-
-	# percents is formatted so that percents[0] is the $$ and percents[1] is the Hieght
-
 	x_unformatted = '-'.join(display_months)
 	y_unformatted = '-'.join(valsOnly)
 
@@ -200,9 +175,9 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 						   defaultYearCost=defaultYearCost, rangedTotalCost=rangedTotalCost)
 
 
+# updates the graphs based on date entries
 @app.route('/staffSpendingUpdate', methods=['GET', 'POST'])
 def staffSpendingUpdate():
-	# part1 get user inputs
 	try:
 		filter_begin_date = request.form['Start Date']
 		filter_end_date = request.form['End Date']

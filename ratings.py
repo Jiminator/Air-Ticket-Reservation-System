@@ -1,6 +1,7 @@
 from app import *
 
 
+# displays ratings given by customers
 @app.route('/flightRatings')
 def flight_ratings():
     try:
@@ -27,6 +28,7 @@ def flight_ratings():
     return render_template('flightRatings.html', rating=data)
 
 
+# displays ratings of a specific flight
 @app.route('/allFlightRatings<airlinename>/<flightnum>/<depdatetime>/')
 def all_flight_ratings(airlinename, flightnum, depdatetime):
     try:

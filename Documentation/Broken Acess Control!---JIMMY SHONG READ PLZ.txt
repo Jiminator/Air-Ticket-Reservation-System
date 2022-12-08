@@ -59,7 +59,9 @@ CompareRevenue:
 
 Go through all files and eliminate comments
 
-Go through document and make sure all use cases are properly filled
-
 Rename all files so they have staff in front of them
+
+Rename all variables
+
+There is a comment in customerPurchase.html
 

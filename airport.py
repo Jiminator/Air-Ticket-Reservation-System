@@ -1,6 +1,7 @@
 from app import *
 
 
+# renders add airport template
 @app.route('/addAirport')
 def add_airport():
     try:
@@ -11,6 +12,7 @@ def add_airport():
     return render_template('addAirport.html')
 
 
+# form for staff to add airport
 @app.route('/addAirportForm', methods=['GET', 'POST'])
 def add_airport_form():
     try:
@@ -28,7 +30,6 @@ def add_airport_form():
     data = cursor.fetchone()
 
     if data:
-        # returns an error message to the html page
         error = 'Airport already exist'
         return render_template('addAirport.html', error=error)
     else:

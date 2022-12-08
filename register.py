@@ -27,7 +27,6 @@ def customer_register_auth():
     cursor.execute(query, email)
     data = cursor.fetchone()
     if data:
-        # If the previous query returns data, then user exists
         error = "Existing customer; try another email address"
         return render_template('customerRegister.html', error=error)
     else:
@@ -67,7 +66,6 @@ def staff_register_auth():
         return render_template('staffRegister.html', error=error)
 
     else:
-        # ensures that the username the user entered does not already exist
         query = 'SELECT * FROM airlineStaff WHERE username = %s'
         cursor.execute(query, username)
         data = cursor.fetchone()
@@ -85,5 +83,4 @@ def staff_register_auth():
             conn.commit()
             cursor.close()
             session['username'] = username
-            # it has to be staff_home
             return redirect(url_for('staff_home'))
