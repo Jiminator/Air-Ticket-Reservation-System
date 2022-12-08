@@ -63,3 +63,5 @@ Check input types of html files
 
 Go through document and make sure all use cases are properly filled
 
+Rename all files so they have staff in front of them
+
