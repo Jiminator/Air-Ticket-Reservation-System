@@ -20,7 +20,6 @@ def index():
     return render_template('index.html')
 
 
-
 app.secret_key = 'some key that you will never guess'
 
 # Run the app on localhost port 5000

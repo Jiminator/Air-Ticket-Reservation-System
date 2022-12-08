@@ -14,7 +14,7 @@ def flight_ratings():
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
     query = '''
     SELECT airline_name, flight_number, departure_date_time, ROUND(AVG(rating),0) AS avg_rating 
@@ -24,7 +24,7 @@ def flight_ratings():
     cursor.execute(query, (airline['airline_name']))
     data = cursor.fetchall()
     cursor.close()
-    return render_template('flightRatings.html', rating = data)
+    return render_template('flightRatings.html', rating=data)
 
 
 @app.route('/allFlightRatings<airlinename>/<flightnum>/<depdatetime>/')
@@ -40,7 +40,7 @@ def all_flight_ratings(airlinename, flightnum, depdatetime):
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
     if airline['airline_name'] != airlinename:
         message = 'You are not logged in to ' + airlinename
@@ -53,4 +53,4 @@ def all_flight_ratings(airlinename, flightnum, depdatetime):
     cursor.execute(query, (airlinename, flightnum, depdatetime))
     data = cursor.fetchall()
     cursor.close()
-    return render_template('allFlightRatings.html', ratings = data)
+    return render_template('allFlightRatings.html', ratings=data)

@@ -58,8 +58,6 @@ def staff_register_auth():
     date_of_birth = request.form['dateofbirth']
     airline_name = request.form['airline']
 
-
-    # ensures that the Airline the user entered exists
     cursor = conn.cursor()
     query = 'SELECT * FROM airline WHERE airline_name = %s'
     cursor.execute(query, airline_name)

@@ -140,7 +140,7 @@ def bothSearch():
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
     print("source_airport: ", source_airport)
     print("dest_airport: ", dest_airport)

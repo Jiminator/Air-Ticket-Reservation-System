@@ -44,7 +44,7 @@
     <form action="/customerPurchaseUpdate" method="POST">
         <fieldset><legend><b>Purchase your Ticket Today!</b></legend>
         <b>Ticket ID:</br></b>
-        <input type="numeric" name="ticketID" placeholder="TicketID" maxlength="10" required /> </br></br>
+        <input type="number" name="ticketID" placeholder="TicketID" required /></br></br>
         <b>Customer Information:</br></b>
         <input type="text" name="Fname" placeholder="First Name" maxlength="225" required /></br>
         <input type="text" name="Lname" placeholder="Last Name" maxlength="225" required /></br>
@@ -55,7 +55,9 @@
           <option value="debit">Debit Card</option>
         </select></br>
         <input type="text" name="Name of Card" placeholder="Name on Card" maxlength="225" required />
-        <input type="date" name="expiration start" value="expiration date" min="2022-12-15" max="2030-12-31">
+        <input type="date" name="expiration start" value="expiration date" placeholder="yyyy-mm-dd" required />
+{#            Start date</br>#}
+{#        <input type="date" name="expiration start" value="expiration date" min="2022-12-15" max="2030-12-31">#}
         <br><br>
         <br><input type="submit" value=submit />
         {% if error and not flag%}

@@ -28,13 +28,12 @@ def add_plane_form():
     FROM airlineStaff 
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
     query = 'SELECT * FROM airplane WHERE airline_name = %s AND airplane_ID = %s'
     cursor.execute(query, (airline['airline_name'], airplaneID))
     data = cursor.fetchone()
-    error = None
-    if (data):
+    if data:
         error = 'Airplane ID already exist'
         return render_template('addPlane.html', error=error)
     else:
@@ -56,10 +55,10 @@ def add_plane_confirm(airlinename, airplaneID):
     cursor = conn.cursor()
     query = '''
     SELECT *
-	FROM airplane
-	WHERE airline_name = %s
-	'''
-    cursor.execute(query, (airlinename))
+    FROM airplane
+    WHERE airline_name = %s
+    '''
+    cursor.execute(query, airlinename)
     data = cursor.fetchall()
     cursor.close()
     return render_template('addPlaneConfirm.html', plane=data, airplaneID=airplaneID)

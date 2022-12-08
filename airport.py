@@ -1,7 +1,6 @@
 from app import *
 
 
-# Define route for adding new airport
 @app.route('/addAirport')
 def add_airport():
     try:
@@ -12,7 +11,6 @@ def add_airport():
     return render_template('addAirport.html')
 
 
-# Define route for adding new airport form
 @app.route('/addAirportForm', methods=['GET', 'POST'])
 def add_airport_form():
     try:
@@ -26,12 +24,10 @@ def add_airport_form():
     type = request.form['type']
     cursor = conn.cursor()
     query = 'SELECT * FROM airport WHERE airport_name = %s'
-    cursor.execute(query, (airport))
+    cursor.execute(query, airport)
     data = cursor.fetchone()
 
-    error = None
-
-    if (data):
+    if data:
         # returns an error message to the html page
         error = 'Airport already exist'
         return render_template('addAirport.html', error=error)

@@ -3,7 +3,7 @@ from datetime import datetime, date
 
 
 def validDates(d1, d2):
-    if d1 == '' or d2 =='':
+    if d1 == '' or d2 == '':
         return True
     start = [int(i) for i in d1.split('-')]
     end = [int(i) for i in d2.split('-')]
@@ -40,7 +40,7 @@ def compare_revenue():
 	FROM airlineStaff 
 	WHERE username = %s
 	'''
-	cursor.execute(airline_query, (username))
+	cursor.execute(airline_query, username)
 	airline = cursor.fetchone()
 	year = '''
 	SELECT SUM(sold_price) AS revenue FROM ticket, purchase 
@@ -57,7 +57,7 @@ def compare_revenue():
 	cursor.execute(month, (airline['airline_name']))
 	month_data = cursor.fetchone()
 	cursor.close()
-	return render_template('compareRevenue.html', year = year_data, month = month_data)
+	return render_template('compareRevenue.html', year=year_data, month=month_data)
 
 
 @app.route('/staffSpending', methods=['GET', 'POST'])
@@ -77,25 +77,25 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 	FROM airlineStaff 
 	WHERE username = %s
 	'''
-	cursor.execute(airline_query, (username))
+	cursor.execute(airline_query, username)
 	airline = cursor.fetchone()
 
 	# the default is to show the cost of 1 year
 	defaultYearCost = """
-        SELECT SUM(sold_price) as totalCost  
-        FROM purchase natural join ticket natural join flight
-        WHERE airline_name=%s
-        AND purchase_date_time>=date_sub(now(), interval 1 year);
-    """
+		SELECT SUM(sold_price) as totalCost  
+		FROM purchase natural join ticket natural join flight
+		WHERE airline_name=%s
+		AND purchase_date_time>=date_sub(now(), interval 1 year);
+	"""
 	cursor.execute(defaultYearCost, (airline['airline_name']))
 	defaultYearCost = cursor.fetchone()['totalCost']
 
 	variables = [airline['airline_name']]
 	rangedTotalCost = """
-    SELECT SUM(sold_price) as totalCost  
-    FROM purchase natural join ticket natural join flight
-    WHERE airline_name=%s
-    """
+	SELECT SUM(sold_price) as totalCost  
+	FROM purchase natural join ticket natural join flight
+	WHERE airline_name=%s
+	"""
 
 	# make query more specific if the user gives us the dates
 	if filter_begin_date != '' or filter_end_date != '':
@@ -167,11 +167,11 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 
 	for i in monthYear:
 		percent = """
-        select SUM(sold_price) as price from purchase natural join ticket
-        where airline_name=%s
-        AND YEAR(purchase_date_time)=%s
-        AND MONTH(purchase_date_time)=%s
-        """
+		select SUM(sold_price) as price from purchase natural join ticket
+		where airline_name=%s
+		AND YEAR(purchase_date_time)=%s
+		AND MONTH(purchase_date_time)=%s
+		"""
 		cursor.execute(percent, (airline['airline_name'], str(i[1]), str(i[2])))
 		val = cursor.fetchone()['price']
 		if val:

@@ -51,4 +51,3 @@ def staff_login_auth():
     else:
         error = 'Invalid Username or Password'
         return render_template('staffLogin.html', error=error)
-

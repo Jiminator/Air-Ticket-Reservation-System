@@ -24,4 +24,3 @@ conn = pymysql.connect(host="localhost",
                        cursorclass=pymysql.cursors.DictCursor)
 
 
-

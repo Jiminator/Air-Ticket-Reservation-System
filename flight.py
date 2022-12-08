@@ -1,6 +1,7 @@
 from app import *
 from datetime import datetime, date
 
+
 # Define route for viewing flights
 @app.route('/viewFlights')
 def view_flights():
@@ -58,7 +59,6 @@ def flight_search():
 
 @app.route('/addFlight')
 def add_flight():
-    #cursor used to send queries
     try:
         username = session['username']
     except Exception:
@@ -71,10 +71,9 @@ def add_flight():
     FROM airlineStaff
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
 
-    #executes query
     query = '''
     SELECT DISTINCT flight.airline_name, flight_number, departure_date_time, arrival_date_time, flight_status, base_price, departure_airport_name, arrival_airport_name, airplane_ID
     FROM airlineStaff, flight
@@ -96,7 +95,7 @@ def add_flight():
     cursor.execute(airpID_query, (airline['airline_name']))
     airpID_data = cursor.fetchall()
     cursor.close()
-    return render_template('addFlight.html', flights = data, airport = airp_data, ID = airpID_data)
+    return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data)
 
 
 @app.route('/addFlightForm', methods=['GET', 'POST'])
@@ -113,7 +112,7 @@ def add_flight_form():
         FROM airlineStaff
         WHERE username = %s
         '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
 
     # executes query
@@ -148,33 +147,30 @@ def add_flight_form():
     airplaneID = request.form['airplaneID']
     username = session['username']
 
-
     cursor = conn.cursor()
     airline_query = '''
     SELECT airline_name
     FROM airlineStaff
     WHERE username = %s
     '''
-    cursor.execute(airline_query, (username))
+    cursor.execute(airline_query, username)
     airline = cursor.fetchone()
 
     query = 'SELECT DISTINCT * FROM flight WHERE airline_name = %s AND flight_number = %s AND departure_date_time = %s'
     cursor.execute(query, (airline['airline_name'], flightnum, depdatetime))
     final_data = cursor.fetchone()
 
-    error = None
-    print(final_data)
-    if (final_data):
+    if final_data:
         # returns an error message to the html page
         error = 'Flight already exists'
-        return render_template('addFlight.html', flights = data, airport = airp_data, ID = airpID_data, error=error)
+        return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data, error=error)
     else:
         airplaneID_query = '''
         SELECT departure_date_time, arrival_date_time
         FROM flight
         WHERE airplane_ID = %s
         '''
-        cursor.execute(airplaneID_query, (airplaneID))
+        cursor.execute(airplaneID_query, airplaneID)
         impossible_dates = cursor.fetchall()
         f = '%Y-%m-%d %H:%M:%S'
         stripped = depdatetime.strip()
@@ -182,12 +178,10 @@ def add_flight_form():
         for date in impossible_dates:
             if date['departure_date_time'] <= departure_date_time <= date['arrival_date_time']:
                 error = 'Plane is in the air at that time.'
-                return render_template('addFlight.html', flights = data, airport = airp_data, ID = airpID_data, error=error)
+                return render_template('addFlight.html', flights=data, airport=airp_data, ID=airpID_data, error=error)
         ins = 'INSERT INTO flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-        cursor.execute(ins, (
-        airline['airline_name'], flightnum, depdatetime, arrdatetime, price, status, depairp, arrairp,
-        airplaneID))
+        cursor.execute(ins,
+            (airline['airline_name'], flightnum, depdatetime, arrdatetime, price, status, depairp, arrairp, airplaneID))
         conn.commit()
         cursor.close()
         return redirect(url_for('add_flight'))
-
