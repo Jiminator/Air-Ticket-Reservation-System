@@ -20,11 +20,6 @@ def view_flights():
 # Search flights
 @app.route('/flightSearch', methods=['GET', 'POST'])
 def flight_search():
-    try:
-        username = session['username']
-    except Exception:
-        message = 'Please Login or Create an Account'
-        return render_template('staffLogin.html', error=message)
     cursor = conn.cursor()
     departPort = request.form['departureairport']
     arrivPort = request.form["arrivalairport"]
