@@ -237,7 +237,7 @@ def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = 
         if seatsTaken >= (totalSeats * 0.6):
             cost = float(cost) * 1.25
             flight['base_price'] = float(cost)
-        if seatsTaken < totalSeats:
+        if seatsTaken < totalSeats and flight['flight_number'] not in finalDisplay:
             finalDisplay.append(flight)
             validTicketID.append(flight['flight_number'])
     # finalDisplay will have all the available flights for purchase that
