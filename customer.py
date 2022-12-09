@@ -241,7 +241,7 @@ def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = 
             SELECT count(flight_number) as seats_taken, ticket_ID, airline_name, airplane_ID, flight_number, number_of_seats, base_price 
             FROM airplane NATURAL JOIN purchase NATURAL JOIN ticket NATURAL JOIN flight    
             WHERE flight_number=%s
-            Group By flight_number; 
+            Group By ticket_ID; 
         """
         cursor.execute(numTickets, (flight['flight_number']))
         numTickets = cursor.fetchone()
