@@ -42,7 +42,10 @@
     <form action="/customerPurchaseUpdate" method="POST">
         <fieldset><legend><b>Purchase your Ticket Today!</b></legend>
         <b>flight number:</br></b>
+        <input type="text" name="airline" placeholder="Airline name" maxlength="20" required /></br>
         <input type="text" name="flight_number" placeholder="flight number" required /></br></br>
+        <input type="date" name="departdate" required /> (Departure date)</br>
+        <input type="text" name="departtime" required /> (Departure time)</br></br>
         <b>Customer Information:</br></b>
         <input type="text" name="Fname" placeholder="First Name" maxlength="225" required /></br>
         <input type="text" name="Lname" placeholder="Last Name" maxlength="225" required /></br>

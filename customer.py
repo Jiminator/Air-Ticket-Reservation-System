@@ -2,6 +2,19 @@ from app import *
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
+def removeDuplicates(lst):
+    new = []
+    [new.append(x) for x in lst if x not in new]
+    print(f"""
+    
+    
+    this is new {new}
+    
+    
+    """)
+    return new
+
+
 
 def genTicketId(taken):
     infinity = 99999999
@@ -190,7 +203,7 @@ def logoutCustomer():
     return render_template('customerLogin.html', error=message, flag=flag)
 
 @app.route('/customerPurchase', methods=['GET', 'POST'])
-def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = '',expDate =''):
+def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = '',expDate ='', departdate='', departtime='', Airline='' ):
     try:
         email = session['email']
     except Exception:
@@ -227,7 +240,8 @@ def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = 
         numTickets = """
             SELECT count(flight_number) as seats_taken, ticket_ID, airline_name, airplane_ID, flight_number, number_of_seats, base_price 
             FROM airplane NATURAL JOIN purchase NATURAL JOIN ticket NATURAL JOIN flight    
-            WHERE flight_number=%s;
+            WHERE flight_number=%s
+            Group By flight_number; 
         """
         cursor.execute(numTickets, (flight['flight_number']))
         numTickets = cursor.fetchone()
@@ -250,6 +264,18 @@ def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = 
 
     message = None
     flag = False
+    today = date.today()
+    today = today.strftime("%b-%d-%Y")
+
+    print(f"""
+            
+            
+            depart date = {departdate}
+
+            depart time = {departtime}
+            
+            
+    """)
     if flight_number and flight_number in validTicketID:
         checkForRepurchase = 'SELECT * FROM purchase natural join flight natural join ticket WHERE flight_number=%s AND email=%s'
         cursor.execute(checkForRepurchase, (flight_number, email))
@@ -261,7 +287,7 @@ def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = 
 
             # this query will get us all of the ticket_IDs
             takenTickets = """
-            SELECT DISTINCT ticket_ID FROM PURCHASE
+            SELECT DISTINCT ticket_ID FROM PURCHASE 
             """
             cursor.execute(takenTickets)
             takenTickets = cursor.fetchall()
@@ -270,33 +296,42 @@ def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = 
             newTicketID = genTicketId(takenList)
 
             popval = None
+
+            departdate = departdate.split('-')
+            departtime = departtime.split(':')
+            if len(departtime) != 3:
+                message = "Error: Please enter valid Departure Time"
+                return render_template('customerPurchase.html', flights=finalDisplay, error=message, flag=flag, today=today)
+
+            theDepartureTime = datetime(int(departdate[0]),int(departdate[1]),int(departdate[2]),int(departtime[0]),int(departtime[1], int(departtime[2])))
             # find the index
             for i,flight in enumerate(finalDisplay):
-                if flight['flight_number'] == flight_number:
-                    popval = i
+                if flight['flight_number'] == flight_number and flight['airline_name'] == Airline and flight["departure_date_time"] == theDepartureTime:
+                        print("THIS RAN")
+                        popval = i
 
-            
-            createTheTicket = 'INSERT INTO ticket Values (%s, %s, %s, %s) '
-            cursor.execute(createTheTicket, (newTicketID, finalDisplay[popval]['airline_name'], flight_number, finalDisplay[popval]['departure_date_time']))
+            if popval:
+                createTheTicket = 'INSERT INTO ticket Values (%s, %s, %s, %s) '
+                cursor.execute(createTheTicket, (newTicketID, finalDisplay[popval]['airline_name'], flight_number, finalDisplay[popval]['departure_date_time']))
 
 
-            purchase = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
-            cursor.execute(purchase, (newTicketID, email, finalDisplay[popval]['base_price'], cardType, cardNumber,name, expDate))
-            conn.commit()
-            message = "Success: this is confirmation of your purchase"
-            flag = True
+                purchase = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
+                cursor.execute(purchase, (newTicketID, email, finalDisplay[popval]['base_price'], cardType, cardNumber,name, expDate))
+                conn.commit()
+                message = "Success: this is confirmation of your purchase"
+                flag = True
 
-            #need to now update the table
-            if popval is not None:
-                finalDisplay.pop(popval)
+                #need to now update the table
+                if popval is not None:
+                    finalDisplay.pop(popval)
+            else:
+                message = "Ticket for this flight is not unavailable for purchase"
     
     elif flight_number:
         message = "Ticket for this flight is not unavailable for purchase"
     
     cursor.close()
-
-    today = date.today()
-    today = today.strftime("%b-%d-%Y")
+    finalDisplay = removeDuplicates(finalDisplay)
     return render_template('customerPurchase.html', flights=finalDisplay, error=message, flag=flag, today=today)
 
 @app.route('/customerPurchaseUpdate', methods=['GET', 'POST'])
@@ -311,7 +346,10 @@ def customerPurchaseUpdate():
     name = request.form['Name of Card']
     cardNumber = request.form['cc-number']
     expDate = request.form["expiration start"]
-    return customerPurchase(flight_number, cardType, name , cardNumber,expDate)
+    departdate = request.form['departdate']
+    departtime = request.form['departtime']
+    airline = request.form['airline']
+    return customerPurchase(flight_number, cardType, name , cardNumber,expDate, departdate, departtime, airline)
 
 
 @app.route('/customerDelete', methods=['GET', 'POST'])
