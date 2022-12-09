@@ -2,6 +2,14 @@ from app import *
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
+
+def genTicketId(taken):
+    infinity = 99999999
+    for i in range(infinity):
+        if i not in taken:
+            return i
+
+
 def validDates(d1,d2):
     max_endDate = datetime.today() + relativedelta(months=-5)
     max_startDate = datetime.today()
@@ -182,13 +190,14 @@ def logoutCustomer():
     return render_template('customerLogin.html', error=message, flag=flag)
 
 @app.route('/customerPurchase', methods=['GET', 'POST'])
-def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',expDate =''):
+def customerPurchase(flight_number = '', cardType = '', name = '', cardNumber = '',expDate =''):
     try:
         email = session['email']
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('customerLogin.html', error=message)
     cursor = conn.cursor()
+
 
     # This query will give us all of our purchases
     purchases = """
@@ -201,7 +210,7 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
 
 
     # Only will filter the tickets that aren't cancelled and 
-    # are in the future. DOESN"T CHECK if the number of seats
+    # are in the future. DOESN"T CHECK if the number of seats YET
     filter1 = """
         SELECT DISTINCT *   
         FROM flight NATURAL JOIN ticket NATURAL JOIN airplane 
@@ -216,11 +225,11 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
     # We will now check for the number of seats
     for flight in filter1:
         numTickets = """
-            SELECT count(ticket_ID) as seats_taken, ticket_ID, airline_name, airplane_ID, flight_number, number_of_seats, base_price 
+            SELECT count(flight_number) as seats_taken, ticket_ID, airline_name, airplane_ID, flight_number, number_of_seats, base_price 
             FROM airplane NATURAL JOIN purchase NATURAL JOIN ticket NATURAL JOIN flight    
-            WHERE ticket_ID=%s;
+            WHERE flight_number=%s;
         """
-        cursor.execute(numTickets, (flight['ticket_ID']))
+        cursor.execute(numTickets, (flight['flight_number']))
         numTickets = cursor.fetchone()
         cost = numTickets['base_price']
         seatsTaken = numTickets['seats_taken']
@@ -230,7 +239,7 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
             flight['base_price'] = float(cost)
         if seatsTaken < totalSeats:
             finalDisplay.append(flight)
-            validTicketID.append(flight['ticket_ID'])
+            validTicketID.append(flight['flight_number'])
     # finalDisplay will have all the available flights for purchase that
     # are Not full, Not cancelled, and Not previous flight
 
@@ -241,21 +250,38 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
 
     message = None
     flag = False
-    if ticketID and int(ticketID) in validTicketID:
-        checkForRepurchase = 'SELECT * FROM purchase WHERE ticket_ID=%s AND email=%s'
-        cursor.execute(checkForRepurchase, (ticketID, email))
+    if flight_number and flight_number in validTicketID:
+        checkForRepurchase = 'SELECT * FROM purchase natural join flight natural join ticket WHERE flight_number=%s AND email=%s'
+        cursor.execute(checkForRepurchase, (flight_number, email))
         checkForRepurchase = cursor.fetchone()
         #checks for repurchase error
         if checkForRepurchase:
             message = "Error: You have already purchased this Ticket!"
         else:
+
+            # this query will get us all of the ticket_IDs
+            takenTickets = """
+            SELECT DISTINCT ticket_ID FROM PURCHASE
+            """
+            cursor.execute(takenTickets)
+            takenTickets = cursor.fetchall()
+            takenList = [i["ticket_ID"] for i in takenTickets]
+
+            newTicketID = genTicketId(takenList)
+
             popval = None
             # find the index
             for i,flight in enumerate(finalDisplay):
-                if int(flight['ticket_ID']) == int(ticketID):
+                if flight['flight_number'] == flight_number:
                     popval = i
+
+            
+            createTheTicket = 'INSERT INTO ticket Values (%s, %s, %s, %s) '
+            cursor.execute(createTheTicket, (newTicketID, finalDisplay[popval]['airline_name'], flight_number, finalDisplay[popval]['departure_date_time']))
+
+
             purchase = 'INSERT INTO purchase VALUES (%s, %s, %s ,%s, %s, %s, %s, NOW());'
-            cursor.execute(purchase, (ticketID, email, finalDisplay[popval]['base_price'], cardType, cardNumber,name, expDate))
+            cursor.execute(purchase, (newTicketID, email, finalDisplay[popval]['base_price'], cardType, cardNumber,name, expDate))
             conn.commit()
             message = "Success: this is confirmation of your purchase"
             flag = True
@@ -264,7 +290,7 @@ def customerPurchase(ticketID = '', cardType = '', name = '', cardNumber = '',ex
             if popval is not None:
                 finalDisplay.pop(popval)
     
-    elif ticketID:
+    elif flight_number:
         message = "Ticket for this flight is not unavailable for purchase"
     
     cursor.close()
@@ -280,12 +306,12 @@ def customerPurchaseUpdate():
     except Exception:
         message = 'Please Login or Create an Account'
         return render_template('customerLogin.html', error=message)
-    ticketID = request.form['ticketID']
+    flight_number = request.form['flight_number']
     cardType = request.form["card type"]
     name = request.form['Name of Card']
     cardNumber = request.form['cc-number']
     expDate = request.form["expiration start"]
-    return customerPurchase(ticketID, cardType, name , cardNumber,expDate)
+    return customerPurchase(flight_number, cardType, name , cardNumber,expDate)
 
 
 @app.route('/customerDelete', methods=['GET', 'POST'])

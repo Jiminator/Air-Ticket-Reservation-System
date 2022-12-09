@@ -16,10 +16,9 @@
 
     Available Flights to Purchase From:
     <table>
-        <th>Cost</th>
-        <th>Ticket ID</th>
-        <th>Airline</th>
         <th>Flight No.</th>
+        <th>Cost</th>
+        <th>Airline</th>
         <th>Departure Date & Time</th>
         <th>Arrival Date & Time</th>
         <th>Status</th>
@@ -28,10 +27,9 @@
 
         {% for line in flights %}
         <tr>
-            <td>${{line['base_price']}}</td>
-            <td>{{line['ticket_ID']}}</td>
-            <td>{{line['airline_name']}}</td>
             <td>{{line['flight_number']}}</td>
+            <td>${{line['base_price']}}</td>
+            <td>{{line['airline_name']}}</td>
             <td>{{line['departure_date_time']}}</td>
             <td>{{line['arrival_date_time']}}</td>
             <td>{{line['flight_status']}}</td>
@@ -43,13 +41,13 @@
 
     <form action="/customerPurchaseUpdate" method="POST">
         <fieldset><legend><b>Purchase your Ticket Today!</b></legend>
-        <b>Ticket ID:</br></b>
-        <input type="number" name="ticketID" placeholder="TicketID" required /></br></br>
+        <b>flight number:</br></b>
+        <input type="text" name="flight_number" placeholder="flight number" required /></br></br>
         <b>Customer Information:</br></b>
         <input type="text" name="Fname" placeholder="First Name" maxlength="225" required /></br>
         <input type="text" name="Lname" placeholder="Last Name" maxlength="225" required /></br>
         <br><b>Payment Information:</br></b>
-        <input id="ccn" type="tel" inputmode="numeric" pattern="[0-9\s]{13,19}" name="cc-number" maxlength="19" placeholder="XXXX XXXX XXXX XXXX">
+        <input id="ccn" type="tel" inputmode="numeric" pattern="[0-9\s]{16,16}" name="cc-number" maxlength="19" placeholder="XXXX XXXX XXXX XXXX">
         <select name="card type" id="card type">
           <option value="credit">Credit Card</option>
           <option value="debit">Debit Card</option>
