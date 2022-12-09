@@ -171,7 +171,7 @@ def bothSearch():
     return render_template('staffViewFlights.html', flights=data)
 
 
-# allow searching using department date
+# allow searching using departure date
 @app.route('/dateDepSearch', methods=['GET', 'POST'])
 def dateDepSearch():
     try:
