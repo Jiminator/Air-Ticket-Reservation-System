@@ -1,0 +1,47 @@
+</html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+
+<head>
+	<script src='https://cdn.plot.ly/plotly-2.16.1.min.js'></script>
+</head>
+
+
+<body>
+    <br> Specify Time Range: </br>
+    <form action="/staffSpendingUpdate" method="POST">
+        <input type="date" name="Start Date" /> Start Date</br>
+        <input type="date" name="End Date" /> End Date</br></br>
+        <input type="submit" value=Search />
+        {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </form>
+    {% if not error %}
+    <h2><p style="color: #006587">Displaying payments from <b>{{bmonth}}, {{byear}} to {{emonth}}, {{eyear}}</b> - ({{noMonths}} months) = <b>${{rangedTotalCost}}</b></p></h2>
+    <h3><p style="color: #a1002b">Total cost from <b>{{lstMonth}}, {{lstYear}} to {{tdyMonth}}, {{tdyYear}}</b> - (LAST YEAR) = <b>${{defaultYearCost}}</b></p></h3>
+	<div id='myDiv'>
+    {% endif %}
+    <script type="text/javascript">
+        x_unformatted = "{{x_unformatted}}";
+        y_unformatted = "{{y_unformatted}}"
+        x = x_unformatted.split('-');
+        y = y_unformatted.split('-');
+
+        var data = [
+        {
+            x: x,
+            y: y,
+            type: 'bar'
+        }
+        ];
+
+        Plotly.newPlot('myDiv', data);
+    </script>
+    </div>
+    <a href="/staffHome">Go back</a>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+
+    <h2>
+        Add new airplane
+    </h2>
+
+
+<body>
+
+    <form action="/addPlaneForm" method="POST">
+        <label for="airplaneID">Airplane ID:</label>
+        <input type="text" name="airplaneID" maxlength="9" required /></br></br>
+
+        <label for="seat">Seat amount:</label>
+        <input type="number" name="seat" placeholder="000" required /></br></br>
+
+        <label for="manufacturer">Manufacturer:</label>
+        <input type="text" name="manufacturer" maxlength="255" required /></br></br>
+
+        <label for="age">Age:</label>
+        <input type="number" name="age" placeholder="000" required /></br></br>
+        <input type="submit" value=Add />
+		{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+		{% endif %}
+	</form>
+
+    <a href="/staffHome">Go back</a>
+
+</body>
+
+</html>

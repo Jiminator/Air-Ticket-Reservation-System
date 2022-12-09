@@ -18,11 +18,9 @@ def customer_login_auth():
     data = cursor.fetchone()
     cursor.close()
     if data:
-        # creates a session for the customer, session is a built in
         session['email'] = email
         return redirect(url_for('customerHome'))
     else:
-        # returns an error message to the html page
         error = 'Invalid login or email'
         return render_template('customerLogin.html', error=error)
 
@@ -51,4 +49,3 @@ def staff_login_auth():
     else:
         error = 'Invalid Username or Password'
         return render_template('staffLogin.html', error=error)
-

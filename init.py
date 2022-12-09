@@ -2,18 +2,22 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 import pymysql.cursors
 from app import app, conn
+import airplane
+import airport
+import analytics
 import customer
-import login
 import flight
+import login
+import ratings
 import register
 import staff
+import status
 
 
 # Index page
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 
 app.secret_key = 'some key that you will never guess'

@@ -1,0 +1,40 @@
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+
+    <h2>
+        Update flight status
+    </h2>
+
+
+<body>
+
+
+    <form action="/flightStatusForm" method="POST">
+        <label for="flight_number">Flight number:</label>
+        <input type="text" name="flight_number" maxlength="9" required /></br></br>
+
+        <label for="departure_date_time">Departure date:</label>
+        <input type="datetime" name="departure_date_time" placeholder="yyyy-mm-dd 00:00:00" required /></br></br>
+
+        <label for="status">Flight status:</label>
+        <select name="status">
+            <option value="on-time">On-time</option>
+            <option value="delayed">Delayed</option>
+            <option value="cancelled">Cancelled</option>
+        </select></br></br>
+
+        <input type="submit" value=Update />
+		{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+		{% endif %}
+	</form>
+
+    <a href="/staffHome">Go back</a>
+
+</body>
+
+</html>
