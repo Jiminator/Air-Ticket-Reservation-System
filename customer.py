@@ -89,45 +89,6 @@ def customerviewflights():
     cursor.close()
     return render_template('customerviewflights.html', flights=flightdata)
 
-# @app.route('/customerviewflightsUpdate', methods=['GET', 'POST'])
-# def customerviewflightsUpdate():
-#     try:
-#         email = session['email']
-#     except Exception:
-#         message = 'Please Login or Create an Account'
-#         return render_template('customerLogin.html', error=message)
-#     cursor = conn.cursor()
-
-#     departPort = request.form['departureairport']
-#     arrivPort = request.form["arrivalairport"]
-#     departdate = request.form["departdate"]
-#     returndate = request.form["returndate"]
-
-#     filter = """
-#     SELECT DISTINCT *   
-#     FROM purchase natural join ticket natural join flight
-#     WHERE email=%s AND departure_date_time > NOW()"""
-#     variables = [email]
-#     if departPort:
-#         filter += ' AND departure_airport_name=%s'
-#         variables.append(departPort)
-#     if arrivPort:
-#         filter += ' AND arrival_airport_name=%s'
-#         variables.append(arrivPort)
-#     if departdate:
-#         filter += ' AND departure_date_time >= %s'
-#         variables.append(departdate)
-#     if returndate:
-#         filter += ' AND arrival_date_time <= %s'
-#         variables.append(returndate)
-#     filter += ' ORDER BY `ticket`.`departure_date_time` ASC;'
-#     cursor.execute(filter, tuple(variables))
-#     display = cursor.fetchall()
-
-
-#     cursor.close()
-#     return render_template('customerviewflights.html', flights=display)
-
 
 @app.route('/customerviewflightsUpdate', methods=['GET', 'POST'])
 def customerviewflightsUpdate():
@@ -407,7 +368,8 @@ def customerRateflightsUpdate():
             query = "INSERT INTO interact VALUES (%s, %s, %s ,%s, %s, %s)"
             cursor.execute(query, (email, airline_name, departure_date_time, flightNo, review, rating))
             conn.commit()
-            message = "Success: this is confirmation of your review"
+            message = "This is confirmation of your review"
+            return render_template('customerRateflight.html', success=message, flights=flightdata)
         else:
             message = 'You have already given the flight a rating'
     else:
