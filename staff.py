@@ -1,5 +1,60 @@
 from app import *
+from datetime import datetime
 
+
+# Allow the staff to create a ticket
+@app.route('/staffCreateTicket')
+def staffCreateTicket(flight_number='', departure_time=''):
+    try:
+        username = session['username']
+    except Exception:
+        message = 'Please Login or Create an Account'
+        return render_template('staffLogin.html', error=message)
+
+    # get the airline the person works for
+    cursor = conn.cursor()
+    query = 'SELECT airline_name FROM airlinestaff WHERE username=%s;'
+    cursor.execute(query, (username))
+    airline = cursor.fetchone()["airline_name"]
+    if flight_number == '' or departure_time == '':
+        return render_template('staffCreateTicket.html', airline=airline)
+    # this will query for all the current flights
+    query = 'SELECT airline_name, flight_number, departure_date_time, number_of_seats FROM flight natural join airplane;'
+    cursor.execute(query)
+    allFlights = cursor.fetchall()
+    # query for all the take ticket IDs
+    query = 'SELECT ticket_ID from ticket;'
+    cursor.execute(query)
+    allTickets = cursor.fetchall()
+    taken_Tickets = []
+    for i in allTickets:
+        taken_Tickets.append(i["ticket_ID"])
+    departure_time = departure_time.split()
+    year, month, day = departure_time[0].split('-')
+    hour, minute, sec = departure_time[1].split(':')
+    depart_time = datetime(int(year), int(month), int(day), int(hour), int(minute), int(sec))
+    for i in allFlights:
+        if i['flight_number'] == flight_number and i['departure_date_time'] == depart_time:
+            for j in range(i['number_of_seats']):
+                for newTicketID in range(10000000):
+                    if newTicketID not in taken_Tickets:
+                        add = "insert into ticket values(%s,%s,%s,%s);"
+                        cursor.execute(add, (newTicketID, airline, flight_number, depart_time))
+                        conn.commit()
+                        taken_Tickets.append(newTicketID)
+                        break
+            message = f"{i['number_of_seats']} tickets have been created for this flight"
+            return render_template('staffCreateTicket.html', airline=airline, error=message)
+    message = f"You entered something wrong. That combination does not exist in the database"
+    return render_template('staffCreateTicket.html', airline=airline, error=message)
+
+
+# Allow the staff to create a ticket
+@app.route('/staffCreateTicketSubmit', methods=['GET', 'POST'])
+def staffCreateTicketSubmit():
+    flight_number = request.form['flight_number']
+    departure_date = request.form['departure_date_time']
+    return staffCreateTicket(flight_number, departure_date)
 
 # Home page for staff
 @app.route('/staffHome')
