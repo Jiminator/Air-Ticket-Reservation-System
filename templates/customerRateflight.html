@@ -51,6 +51,9 @@
         <form action="/customerPurchase" class="inline">
             <button class="submit-button" >Submit</button>
         </form>
+        {% if success %}
+        <p class="success"><strong>Success:</strong> {{success}}</p>
+        {% endif %}
         {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
         {% endif %}
