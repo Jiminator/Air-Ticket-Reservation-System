@@ -1,0 +1,33 @@
+<html>
+<head>
+    <h1>
+        Air Ticket Reservation System
+    </h1>
+</head>
+
+
+
+<body>
+
+    <h2>
+        Create Tickets for a New Flight for {{airline}} Airlines
+    </h2>
+    <form action="/staffCreateTicketSubmit" method="POST">
+
+        <label for="flight_number">Flight number:</label>
+        <input type="text" name="flight_number" maxlength="9" required /></br></br>
+
+        <label for="departure_date_time">Departure date:</label>
+        <input type="datetime" name="departure_date_time" placeholder="yyyy-mm-dd 00:00:00" required /></br></br>
+
+		{% if error %}
+		<p class="error"><strong> {{error}} </strong></p>
+		{% endif %}
+        <input type="submit" value=Add />
+	</form>
+
+    <a href="/staffHome">Go back</a>
+
+</body>
+
+</html>

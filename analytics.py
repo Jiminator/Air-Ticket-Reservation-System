@@ -96,7 +96,7 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 	cursor.execute(airline_query, username)
 	airline = cursor.fetchone()
 	defaultYearCost = """
-		SELECT SUM(sold_price) as totalCost  
+		SELECT COUNT(ticket_id) as totalCost  
 		FROM purchase natural join ticket natural join flight
 		WHERE airline_name=%s
 		AND purchase_date_time>=date_sub(now(), interval 1 year);
@@ -106,7 +106,7 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 
 	variables = [airline['airline_name']]
 	rangedTotalCost = """
-	SELECT SUM(sold_price) as totalCost  
+	SELECT COUNT(ticket_id) as totalCost  
 	FROM purchase natural join ticket natural join flight
 	WHERE airline_name=%s
 	"""
@@ -158,7 +158,7 @@ def staffSpending(filter_begin_date='', filter_end_date=''):
 		monthYear.append(i)
 	for i in monthYear:
 		percent = """
-		select SUM(sold_price) as price from purchase natural join ticket
+		select COUNT(ticket_id) as price from purchase natural join ticket
 		where airline_name=%s
 		AND YEAR(purchase_date_time)=%s
 		AND MONTH(purchase_date_time)=%s
